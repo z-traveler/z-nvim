@@ -1,48 +1,6 @@
 local M = {}
 
-local colors = {
-  none = "none",
-  color_bg = "#151d29",
-  light_bg = "#16191f",
-  fg = "#bbc2cf",
-  dark_fg = "#2e314a",
-  yellow = "#ecbe7b",
-  cyan = "#008080",
-  darkblue = "#081633",
-  green = "#98be65",
-  light_green = "#84a729",
-  orange = "#fac03d",
-  violet = "#a9a1e1",
-  magenta = "#c678dd",
-  purple = "#c678dd",
-  blue = "#51afef",
-  light_blue = "#8aabcc",
-  white = "#d4e5ef",
-  red = "#ec5f67",
-}
-M.colors = colors
-
-M.overwrite_gruvbox_hl = function()
-  if vim.g.colors_name ~= "gruvbox-material" then
-    return
-  end
-  local update_hl = function(group_name, new)
-    local current_hl = vim.api.nvim_get_hl(0, { name = group_name })
-    vim.api.nvim_set_hl(0, group_name, vim.tbl_extend("force", current_hl, new))
-  end
-  update_hl("CursorLine", { bg = colors.light_bg })
-  update_hl("CurrentWord", { bg = colors.dark_fg })
-  update_hl("Normal", { bg = colors.none })
-  update_hl("NormalNC", { bg = colors.none })
-  update_hl("NormalFloat", { bg = colors.none })
-  update_hl("FloatBorder", { bg = colors.none })
-  update_hl("SignColumn", { bg = "none" })
-  update_hl("MsgArea", { bg = "none" })
-  update_hl("EndOfBuffer", { bg = "none" })
-
-  update_hl("Pmenu", { bg = "none" }) -- 补全菜单
-  update_hl("PmenuSel", { fg = colors.orange, bg = colors.dark_fg }) -- 补全菜单选中项
-end
+local colors = require("config.ui").colors
 
 local conditions = {
   buffer_not_empty = function()
@@ -53,7 +11,7 @@ local conditions = {
   end,
 }
 
-M.lualine_sources = {
+M.sources = {
   mode = {
     function()
       return " "

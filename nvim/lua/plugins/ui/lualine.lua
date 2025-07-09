@@ -1,5 +1,4 @@
-local ui_cfg = require("config.ui")
-local lualine_sources = ui_cfg.lualine_sources
+local sources = require("config.ui.lualine").sources
 
 return {
   {
@@ -16,42 +15,41 @@ return {
         },
         sections = {
           lualine_a = {
-            lualine_sources.mode,
+            sources.mode,
           },
           lualine_b = {
-            lualine_sources.branch,
-            lualine_sources.root_dir(),
-            lualine_sources.filetype,
-            lualine_sources.pretty_path,
+            sources.branch,
+            sources.root_dir(),
+            sources.filetype,
+            sources.pretty_path,
           },
           lualine_c = {
-            lualine_sources.symbol(),
-            lualine_sources.diff,
+            sources.symbol(),
+            sources.diff,
           },
           lualine_x = {
-            lualine_sources.diagnostics,
-            lualine_sources.scrollbar,
-            lualine_sources.noice_command,
-            lualine_sources.dap,
-            lualine_sources.treesitter,
-            lualine_sources.lsp_clients,
+            sources.diagnostics,
+            sources.scrollbar,
+            sources.noice_command,
+            sources.dap,
+            sources.treesitter,
+            sources.lsp_clients,
           },
           lualine_y = {
-            lualine_sources.noice_mode,
-            lualine_sources.lazy_status,
-            lualine_sources.encoding,
+            sources.noice_mode,
+            sources.encoding,
           },
           lualine_z = {
-            lualine_sources.slogan,
+            sources.slogan,
           },
         },
         inactive_sections = {
           lualine_a = {},
           lualine_b = {
-            lualine_sources.filename,
+            sources.filename,
           },
           lualine_c = {
-            lualine_sources.diff,
+            sources.diff,
           },
           lualine_x = {},
           lualine_y = {},
