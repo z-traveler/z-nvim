@@ -56,5 +56,6 @@
   "vc.vim": { "branch": "master", "commit": "b7a6dfb34729a5814d34de4d73c13cf3b92115ae" },
   "vim-signify": { "branch": "master", "commit": "8670143f9e12ed1cd3c9b2c54f345cdd9a4baac3" },
   "vim-tmux-navigator": { "branch": "master", "commit": "412c474e97468e7934b9c217064025ea7a69e05e" },
-  "which-key.nvim": { "branch": "main", "commit": "370ec46f710e058c9c1646273e6b225acf47cbed" }
+  "which-key.nvim": { "branch": "main", "commit": "370ec46f710e058c9c1646273e6b225acf47cbed" },
+  "xmake.nvim": { "branch": "main", "commit": "ae9bb3ec97cd27cd95f616687096e529363aa80b" }
 }
