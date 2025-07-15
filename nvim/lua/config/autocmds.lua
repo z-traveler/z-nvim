@@ -20,3 +20,5 @@ vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
     vim.lsp.inlay_hint.enable(true)
   end,
 })
+
+require("config.editor.buffer").register_prev_bufs()

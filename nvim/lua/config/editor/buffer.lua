@@ -1,5 +1,18 @@
 local M = {}
 
+M.prev_bufs = {}
+
+function M.register_prev_bufs()
+  vim.api.nvim_create_autocmd("BufLeave", {
+    callback = function()
+      M.prev_bufs[vim.api.nvim_get_current_win()] = { vim.api.nvim_get_current_buf(), vim.api.nvim_win_get_cursor(0) }
+    end,
+  })
+end
+
+---@param kill_command? string defaults to "bd"
+---@param bufnr? number defaults to the current buffer
+---@param force? boolean defaults to false
 function M.buf_kill(kill_command, bufnr, force)
   kill_command = kill_command or "bd"
 

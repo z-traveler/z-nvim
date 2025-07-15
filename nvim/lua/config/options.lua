@@ -5,6 +5,7 @@
 vim.g.lazy = true
 
 -- for profile
+vim.opt.ttyfast = true
 vim.opt.updatetime = 666
 vim.opt.timeoutlen = 666
 vim.g.cursorhold_updatetime = 666
@@ -57,6 +58,7 @@ vim.opt.winfixwidth = true
 ---- buffer
 vim.opt.hidden = true
 vim.opt.switchbuf = "usetab,uselast"
+vim.opt.jumpoptions = "clean"  -- <c-o>不会跳回到被卸载的buffer
 
 -- input
 vim.opt.mouse = ""
