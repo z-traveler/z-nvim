@@ -105,7 +105,7 @@ vim.opt.wrapscan = false
 -- formatting
 vim.g.autoformat = false
 -- spell
-vim.opt_local.spell = true
+vim.opt_local.spell = false
 vim.cmd [[
     iabbrev adn and
     iabbrev calss class
