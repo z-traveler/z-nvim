@@ -24,13 +24,13 @@ vim.opt.showmode = false -- 不显示INSERT等模式提示
 -- char
 vim.opt.list = false
 vim.opt.listchars = {
-  tab = '→ ',
-  space = '·',
-  trail = '•',
-  extends = '❯',
-  precedes = '❮',
-  nbsp = '×',
-  eol = '¬'
+  tab = "→ ",
+  space = "·",
+  trail = "•",
+  extends = "❯",
+  precedes = "❮",
+  nbsp = "×",
+  eol = "¬",
 } -- 调试不可见符号时打开list, 关闭indent-blank
 -- line
 vim.opt.relativenumber = false
@@ -40,9 +40,12 @@ vim.opt.linespace = 8
 vim.opt.scrolloff = 9
 vim.opt.sidescrolloff = 9
 -- indent
-vim.opt.expandtab = true
 vim.opt.smartindent = false
 vim.opt.autoindent = false
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 4 -- 自动缩进n个字符
+vim.opt.tabstop = 4 -- 一个tab显示为n个字符
+vim.opt.softtabstop = 4 -- 按tab键缩进n个字符, 如上与tabstop不一致, 就算expandtab为false, 也会插入空格
 -- animations
 vim.g.snacks_animate = false
 
@@ -106,12 +109,12 @@ vim.opt.wrapscan = false
 vim.g.autoformat = false
 -- spell
 vim.opt_local.spell = false
-vim.cmd [[
+vim.cmd([[
     iabbrev adn and
     iabbrev calss class
     iabbrev sefl self
     iabbrev NOne None
-]]
+]])
 
 require("config.editor.fzf")
 require("config.window.terminal")
