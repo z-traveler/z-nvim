@@ -1,4 +1,9 @@
-_G.exclude_dirs = {}
+_G.exclude_dirs = {
+  "*.pyc",
+  "*.pyo",
+  "*.so",
+  "*.o",
+}
 function _G.add_exclude_dirs(dir)
   table.insert(_G.exclude_dirs, dir)
 end
