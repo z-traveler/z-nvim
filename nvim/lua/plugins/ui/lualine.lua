@@ -3,8 +3,8 @@ local sources = require("config.ui.lualine").sources
 return {
   {
     "nvim-lualine/lualine.nvim",
-    opts = function()
-      local opts = {
+    opts = function(_, opts)
+      local m_opts = {
         options = {
           theme = "auto",
           icons_enabled = true,
@@ -12,6 +12,25 @@ return {
           component_separators = { left = "", right = "" },
           section_separators = { left = "", right = "" },
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
+          refresh = {
+            statusline = 666,
+            tabline = 666,
+            winbar = 666,
+            refresh_time = 66, -- ~15fps
+            events = {
+              "WinEnter",
+              "BufEnter",
+              "BufWritePost",
+              "SessionLoadPost",
+              "FileChangedShellPost",
+              "VimResized",
+              "Filetype",
+              "ModeChanged",
+              -- OPTIM: 性能优化, 等待自动更新, 而不是事件刷新
+              -- "CursorMoved",
+              -- "CursorMovedI",
+            },
+          },
         },
         sections = {
           lualine_a = {
@@ -24,7 +43,7 @@ return {
             sources.pretty_path,
           },
           lualine_c = {
-            sources.symbol(),
+            -- sources.symbol(),  -- 有些华而不实
             sources.diff,
           },
           lualine_x = {
@@ -57,7 +76,7 @@ return {
         },
         extensions = { "neo-tree", "lazy", "fzf" },
       }
-      return opts
+      return m_opts
     end,
   },
 }
