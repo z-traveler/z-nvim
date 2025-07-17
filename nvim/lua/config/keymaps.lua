@@ -106,7 +106,6 @@ end, { desc = "Format" })
 -- diagnostic
 del("n", "<leader>cd")
 map("n", "<leader>ld", vim.diagnostic.open_float, { desc = "Line Diagnostic" })
-
 ---- put
 map("n", "<leader>py", require("config.editor.put").current_location, { desc = "Put Current Location" })
 map("n", "<leader>pp", require("config.editor.put").locate, { desc = "Put Current Location" })

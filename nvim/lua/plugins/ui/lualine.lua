@@ -43,13 +43,13 @@ return {
             sources.pretty_path,
           },
           lualine_c = {
-            -- sources.symbol(),  -- 有些华而不实
+            -- sources.symbol(),  -- 华而不实
             sources.diff,
           },
           lualine_x = {
             sources.diagnostics,
             sources.scrollbar,
-            sources.noice_command,
+            -- sources.noice_command,  -- 无帮助
             sources.dap,
             sources.treesitter,
             sources.lsp_clients,

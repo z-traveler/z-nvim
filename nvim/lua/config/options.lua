@@ -8,6 +8,7 @@ vim.g.lazy = true
 vim.opt.ttyfast = true
 vim.opt.updatetime = 666
 vim.opt.timeoutlen = 666
+vim.cmd("syntax off")
 vim.g.cursorhold_updatetime = 666
 vim.g.matchparen_timeout = 10
 vim.g.matchparen_insert_timeout = 10
