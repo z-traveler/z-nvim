@@ -2,16 +2,13 @@
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
 
-vim.g.lazy = true
-
 -- for profile
+vim.cmd("syntax off")
 vim.opt.ttyfast = true
 vim.opt.updatetime = 666
 vim.opt.timeoutlen = 666
-vim.cmd("syntax off")
-vim.g.cursorhold_updatetime = 666
-vim.g.matchparen_timeout = 10
-vim.g.matchparen_insert_timeout = 10
+vim.g.matchparen_timeout = 66
+vim.g.matchparen_insert_timeout = 66
 vim.g.loaded_matchparen = 1
 
 ---- ui
