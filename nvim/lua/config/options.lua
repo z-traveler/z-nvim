@@ -42,9 +42,9 @@ vim.opt.sidescrolloff = 9
 vim.opt.smartindent = false
 vim.opt.autoindent = false
 vim.opt.expandtab = true
-vim.opt.shiftwidth = 4 -- 自动缩进n个字符
-vim.opt.tabstop = 4 -- 一个tab显示为n个字符
-vim.opt.softtabstop = 4 -- 按tab键缩进n个字符, 如上与tabstop不一致, 就算expandtab为false, 也会插入空格
+vim.opt.shiftwidth = 2 -- 自动缩进n个字符
+vim.opt.tabstop = 2 -- 一个tab显示为n个字符
+vim.opt.softtabstop = 2 -- 按tab键缩进n个字符, 如上与tabstop不一致, 就算expandtab为false, 也会插入空格
 -- animations
 vim.g.snacks_animate = false
 
@@ -56,7 +56,7 @@ vim.opt.winfixwidth = true
 ---- buffer
 vim.opt.hidden = true
 vim.opt.switchbuf = "usetab,uselast"
-vim.opt.jumpoptions = "clean"  -- <c-o>不会跳回到被卸载的buffer
+vim.opt.jumpoptions = "clean" -- <c-o>不会跳回到被卸载的buffer
 
 -- input
 vim.opt.mouse = ""
@@ -110,10 +110,10 @@ vim.g.autoformat = false
 -- spell
 vim.opt_local.spell = false
 vim.cmd([[
-    iabbrev adn and
-    iabbrev calss class
-    iabbrev sefl self
-    iabbrev NOne None
+  iabbrev adn and
+  iabbrev calss class
+  iabbrev sefl self
+  iabbrev NOne None
 ]])
 
 require("config.editor.fzf")
