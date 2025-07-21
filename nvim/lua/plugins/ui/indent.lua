@@ -71,4 +71,7 @@ return {
       return vim.tbl_deep_extend("force", opts or {}, m_opts)
     end,
   },
+  {
+    "nmac427/guess-indent.nvim",
+  }
 }
