@@ -13,6 +13,12 @@ return {
       })
       local m_opts = {
         servers = {
+          ruff = {
+            enabled = false,
+          },
+          ruff_lsp = {
+            enabled = false,
+          },
           pyright = {
             settings = {
               python = {
@@ -37,5 +43,14 @@ return {
       }
       return vim.tbl_deep_extend("force", opts or {}, m_opts)
     end,
+  },
+  {
+    "stevearc/conform.nvim",
+    ft = "python",
+    opts = {
+      formatters_by_ft = {
+        python = { "ruff_format" },
+      },
+    },
   },
 }

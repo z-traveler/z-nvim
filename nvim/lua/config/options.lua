@@ -115,9 +115,3 @@ vim.cmd([[
   iabbrev sefl self
   iabbrev NOne None
 ]])
-
-require("config.editor.fzf")
-require("config.window.terminal")
-if vim.fn.filereadable(".vimrc.local.lua") then
-  pcall(dofile, ".vimrc.local.lua")
-end
