@@ -86,7 +86,7 @@ M.sources = {
   filetype = {
     "filetype",
     icon_only = true,
-    padding = { left = 1, right = 0 },
+    padding = { left = 2, right = 0 },
     color = { bg = colors.none },
     cond = conditions.hide_in_width,
   },
@@ -102,9 +102,9 @@ M.sources = {
     cond = conditions.hide_in_width,
   },
 
-  ---@param opts? {cwd:false, subdirectory: true, parent: true, other: true, icon?:string}
-  root_dir = function(opts)
-    local ret = LazyVim.lualine.root_dir(opts)
+  root_dir = function()
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local ret = LazyVim.lualine.root_dir({ cwd = true })
     ret = vim.tbl_extend(
       "force",
       ret,
@@ -114,7 +114,7 @@ M.sources = {
   end,
 
   pretty_path = {
-    LazyVim.lualine.pretty_path(),
+    LazyVim.lualine.pretty_path({ length = 7 }),
     color = { bg = colors.none },
   },
 
