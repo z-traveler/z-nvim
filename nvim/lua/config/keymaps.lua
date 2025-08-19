@@ -28,6 +28,8 @@ map("n", "<leader>q", "q", { desc = "Vim Macro", noremap = true })
 -- move window
 -- see vim-tmux-navigator
 map("n", "<A-w>", "<cmd>wincmd w<cr>", { desc = "Go to Window", noremap = true, silent = true })
+map("n", "<leader>wv", "<cmd>vs<cr>", { desc = "Split Right", noremap = true, silent = true })
+map("n", "<leader>ws", "<cmd>sp<cr>", { desc = "Split Down", noremap = true, silent = true })
 -- resize window
 map("n", "<A-up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height", silent = true })
 map("n", "<A-down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height", silent = true })
@@ -78,10 +80,19 @@ map("n", "H", "^", { desc = "Go to First Non-Blank Character of Line", noremap =
 map("v", "H", "^", { desc = "Go to First Non-Blank Character of Line", noremap = true, silent = true })
 map("n", "L", "$", { desc = "Go to Last Non-Blank Character of Line", noremap = true, silent = true })
 map("v", "L", "$", { desc = "Go to Last Non-Blank Character of Line", noremap = true, silent = true })
-map("n", "T", "J", { desc = "Connetc Line", noremap = true, silent = true })
+map("n", "T", "J", { desc = "Connect Line", noremap = true, silent = true })
 
 ---- git
 -- see lazyvim default
+map("n", "<leader>vg", function() Snacks.lazygit( { cwd = LazyVim.root.git() }) end, { desc = "Lazygit (Root Dir)" })
+del("n", "<leader>gg")
+del("n", "<leader>gG")
+del("n", "<leader>gf")
+del("n", "<leader>gl")
+del("n", "<leader>gL")
+del("n", "<leader>gb")
+del("n", "<leader>gB")
+del("n", "<leader>gY")
 
 ---- terminal
 del("n", "<leader>ft")

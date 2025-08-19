@@ -78,59 +78,29 @@ return {
       { "<leader>sw", false },
       { "<leader>sW", false },
       { "<leader>fR", false },
+      { "<leader>gc", false },
+      { "<leader>gs", false },
       -- files
-      {
-        "<leader>ff",
-        function()
-          require("config.editor.fzf").files_excluded()
-        end,
-        desc = "Find Files (Excluded)",
-      },
+      -- stylua: ignore 
+      { "<leader>ff", function() require("config.editor.fzf").files_excluded() end, desc = "Find Files (Excluded)", },
       { "<leader>fF", LazyVim.pick("files"), desc = "Find Files (Root Dir)" },
       { "<leader>fr", LazyVim.pick("oldfiles", { cwd = vim.uv.cwd() }), desc = "Recent (Root Dir)" },
       -- search
-      {
-        "<leader>sg",
-        function()
-          require("config.editor.fzf").rg_excluded()
-        end,
-        desc = "Grep (Excluded)",
-      },
-      {
-        "<leader>sg",
-        function()
-          require("config.editor.fzf").rg_excluded({ visual = true })
-        end,
-        mode = "v",
-        desc = "Selection Grep (Excluded)",
-      },
-      {
-        "<leader>sG",
-        function()
-          require("config.editor.fzf").live_grep()
-        end,
-        desc = "Grep (Root Dir)",
-      },
-      {
-        "<leader>sG",
-        function()
-          require("config.editor.fzf").live_grep({ visual = true })
-        end,
-        mode = "v",
-        desc = "Selection Grep (Root Dir)",
-      },
-      {
-        "<leader>sP",
-        function()
-          require("config.editor.fzf").select_and_grep()
-        end,
-        desc = "Grep (Special Dir)",
-      },
-      { "<leader>st", "<cmd>FzfLua tags_live_grep<cmd>", desc = "Tags" },
+      -- stylua: ignore start
+      { "<leader>sg", function() require("config.editor.fzf").rg_excluded() end, desc = "Grep (Excluded)", },
+      { "<leader>sg", function() require("config.editor.fzf").rg_excluded({ visual = true }) end, mode = "v", desc = "Selection Grep (Excluded)", },
+      { "<leader>sG", function() require("config.editor.fzf").live_grep() end, desc = "Grep (Root Dir)", },
+      { "<leader>sG", function() require("config.editor.fzf").live_grep({ visual = true }) end, mode = "v", desc = "Selection Grep (Root Dir)", },
+      { "<leader>sP", function() require("config.editor.fzf").select_and_grep() end, desc = "Grep (Special Dir)", },
+      -- tags
+      { "gh", function() require("config.editor.fzf").gtag_grep() end, desc = "Tags Grep" },
+      -- stylua: ignore end
       -- fast
       { "<leader>sj", "<cmd>FzfLua resume<cr>", desc = "Resume" },
       { "<leader>fj", "<cmd>FzfLua resume<cr>", desc = "Resume" },
       { "<leader><space>", "<cmd>FzfLua buffers sort_mru=true sort_lastused=true<cr>", desc = "Switch Buffer" },
+      -- git
+      { "<leader>vs", "<cmd>FzfLua git_status<cr>", desc = "Git Status" },
       -- help
       { "<leader>sH", "<cmd>FzfLua help_tags<cr>", desc = "Help Pages" },
       { "<leader>sK", "<cmd>FzfLua keymaps<cr>", desc = "Key Maps" },

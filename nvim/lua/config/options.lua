@@ -20,6 +20,7 @@ vim.opt.numberwidth = 4
 vim.opt.signcolumn = "yes:2"
 vim.opt.colorcolumn = "99999" -- 修复indentline显示问题
 vim.opt.showmode = false -- 不显示INSERT等模式提示
+vim.opt.statuscolumn = "" -- 禁用自定义状态栏列
 -- char
 vim.opt.list = false
 vim.opt.listchars = {
@@ -115,3 +116,5 @@ vim.cmd([[
   iabbrev sefl self
   iabbrev NOne None
 ]])
+
+require("config.editor.gtag").setup()

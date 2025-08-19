@@ -133,4 +133,117 @@ function _G.cascade_grep()
   })
 end
 
+function M.gtag_grep()
+  local gtag = require("config.editor.gtag")
+  local gtags_env = gtag.get_gtags_env()
+  if not gtags_env then
+    vim.notify("No gtags database found", vim.log.levels.WARN)
+    return
+  end
+
+  local fzf = require("fzf-lua")
+  local func = fzf.live_grep
+
+  local env_str = ""
+  for k, v in pairs(gtags_env) do
+    env_str = env_str .. k .. "=" .. v .. " "
+  end
+
+  local base_cmd = env_str .. "global --color=always --result=grep -i"
+  local ctx = string.format(" %d:%s", vim.fn.line("."), vim.fn.expand("%p"))
+  local cword = vim.fn.expand("<cword>") or ""
+
+  local query_params = {
+    ["--from-here"] = { active = false, desc = "ctx", key = "ctrl-h" },
+    ["-d"] = { active = false, desc = "def", key = "ctrl-d" },
+    ["-r"] = { active = false, desc = "ref", key = "ctrl-r" },
+  }
+
+  if cword then
+    query_params["--from-here"].active = true
+  else
+    query_params["-d"].active = true
+  end
+
+  local function build_cmd()
+    for param, info in pairs(query_params) do
+      if info.active then
+        if param == "--from-here" then
+          return base_cmd .. " " .. param .. ctx
+        else
+          return base_cmd .. " " .. param
+        end
+      end
+    end
+    return base_cmd
+  end
+
+  local function build_header()
+    local status = {}
+    local green = "\27[32m" -- 绿色
+    local gray = "\27[90m" -- 灰色
+    local reset = "\27[0m" -- 重置颜色
+
+    local no_active = true
+    for _, info in pairs(query_params) do
+      if info.active then
+        no_active = false
+      end
+    end
+    if no_active then
+      query_params["-d"].active = true
+    end
+
+    for _, info in pairs(query_params) do
+      local indicator = info.active and "●" or "○"
+      local color = info.active and green or gray
+      table.insert(status, string.format("%s%s: %s %s%s", color, info.key, indicator, info.desc, reset))
+    end
+    return table.concat(status, " | ")
+  end
+
+  local function build_actions()
+    local actions = {}
+    for param, info in pairs(query_params) do
+      actions[info.key] = { fn = toggle_param(param), reload = true }
+    end
+    return actions
+  end
+
+  function toggle_param(target_param)
+    return function(opts)
+      if query_params[target_param].active then
+        query_params[target_param].active = false
+      else
+        for param, info in pairs(query_params) do
+          info.active = (param == target_param)
+        end
+      end
+
+      -- 重新启动 fzf
+      func({
+        resume = true,
+        cmd = build_cmd(),
+        actions = build_actions(),
+        prompt = "gtag> ",
+        header = build_header(),
+        fn_transform = function(x)
+          return x:gsub("%s+", " ")
+        end,
+      })
+    end
+  end
+
+  func({
+    cmd = build_cmd(),
+    query = cword,
+    actions = build_actions(),
+    prompt = "gtag> ",
+    header = build_header(),
+    fn_transform = function(x)
+      return x:gsub("%s+", " ")
+    end,
+  })
+end
+
 return M
