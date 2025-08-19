@@ -5,7 +5,8 @@ return {
   { "echasnovski/mini.pairs", enabled = false },
   {
     "saghen/blink.pairs",
-    build = "cargo build --release",
+    version = "*",
+    dependencies = "saghen/blink.download",
     opts = function(_, opts)
       vim.api.nvim_create_autocmd({ "User" }, {
         pattern = "LazyLoad",
@@ -38,7 +39,6 @@ return {
             "BlinkPairsViolet",
             "BlinkPairsCyan",
           },
-          unmatched_group = "BlinkPairsUnmatched",
           matchparen = {
             enabled = true,
             group = "MatchParen",
