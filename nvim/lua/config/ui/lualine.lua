@@ -86,7 +86,7 @@ M.sources = {
   filetype = {
     "filetype",
     icon_only = true,
-    padding = { left = 2, right = 0 },
+    padding = { left = 1, right = 0 },
     color = { bg = colors.none },
     cond = conditions.hide_in_width,
   },

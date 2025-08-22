@@ -10,8 +10,10 @@ M.config = {
 }
 
 M.state = {
-  steuped = false,
+  steup = false,
   update_timer = nil,
+  is_generating = false,
+  debug = false,
 }
 
 function M.get_project_root()
@@ -68,6 +70,11 @@ function M.async_execute(cmd, cwd, env, callback)
 end
 
 function M.generate_full(project_root, cache_path, callback)
+  if M.state.is_generating then
+    return
+  end
+
+  M.state.is_generating = true
   M.ensure_cache_dir(cache_path)
   local env = {
     GTAGSLABEL = M.config.gtagslabel,
@@ -77,6 +84,7 @@ function M.generate_full(project_root, cache_path, callback)
   vim.notify("Generating gtags database for project...", vim.log.levels.INFO)
 
   return M.async_execute(cmd, project_root, env, function(exit_code)
+    M.state.is_generating = false
     if exit_code == 0 then
       vim.notify("GTAGS database generated successfully", vim.log.levels.INFO)
     else
@@ -88,7 +96,12 @@ function M.generate_full(project_root, cache_path, callback)
   end)
 end
 
-function M.update_incremental(project_root, cache_path, callback)
+function M.update_incremental(opts)
+  opts = opts or {}
+  local cache_path = opts.cache_path
+  local project_root = opts.project_root
+  local callback = opts.callback
+  local filepath = opts.filepath
   if not M.has_gtags_db(cache_path) then
     return M.generate_full(project_root, cache_path, callback)
   end
@@ -100,27 +113,44 @@ function M.update_incremental(project_root, cache_path, callback)
     GTAGSCONF = M.config.gtagsconf,
   }
 
-  local cmd = { "global", "-u" }
+  local cmd
+  if filepath then
+    local relative_path = vim.fn.fnamemodify(filepath, ":~:.")
+    cmd = { "global", "--single-update", relative_path }
+  else
+    cmd = { "global", "-u" }
+  end
 
+  if M.state.debug then
+    vim.notify("Updating gtags database with incremental..." .. vim.inspect(cmd), vim.log.levels.DEBUG)
+  end
+  local st = vim.loop.hrtime()
   return M.async_execute(cmd, project_root, env, function(exit_code)
+    local et = vim.loop.hrtime()
+    local dr = (et - st) / 1000000
     if exit_code == 0 then
+      if M.state.debug then
+        vim.notify("Updating gtags database with incremental done: " .. tostring(dr) .. "ms", vim.log.levels.DEBUG)
+      end
       if callback then
         callback(exit_code)
       end
     else
       vim.notify("Failed to update GTAGS database", vim.log.levels.WARN)
-      M.generate_full(project_root, cache_path, callback)
     end
   end)
 end
 
-function M.update_or_generate()
+function M.update_or_generate(opts)
+  if M.state.is_generating then
+    return
+  end
+
   local project_root = M.get_project_root()
   local cache_path = M.get_cache_path(project_root)
 
   local current_ft = vim.bo.filetype
   local should_process = false
-
   for _, ft in ipairs(M.config.filetypes) do
     if current_ft == ft then
       should_process = true
@@ -132,20 +162,22 @@ function M.update_or_generate()
     return
   end
 
+  opts = opts or {}
+  opts = vim.tbl_deep_extend("force", opts, { project_root = project_root, cache_path = cache_path })
   if M.has_gtags_db(cache_path) then
-    M.update_incremental(project_root, cache_path)
+    M.update_incremental(opts)
   else
     M.generate_full(project_root, cache_path)
   end
 end
 
-function M.deboundced_update_or_generate()
+function M.deboundced_update_or_generate(opts)
   if M.state.update_timer then
     vim.fn.timer_stop(M.state.update_timer)
   end
   M.state.update_timer = vim.fn.timer_start(500, function()
     M.state.update_timer = nil
-    M.update_or_generate()
+    M.update_or_generate(opts)
   end)
 end
 
@@ -178,15 +210,25 @@ function M.setup_autocmds()
   vim.api.nvim_create_autocmd("BufWritePost", {
     group = group,
     pattern = "*",
-    callback = function()
+    callback = function(args)
+      local filepath = vim.fn.fnamemodify(args.file, ":p")
       vim.defer_fn(function()
-        M.deboundced_update_or_generate()
+        M.deboundced_update_or_generate({ filepath = filepath })
       end, 100)
     end,
   })
 end
 
 function M.setup_commands()
+  vim.api.nvim_create_user_command("GtagsDebugToggle", function()
+    if M.state.debug then
+      M.state.debug = false
+    else
+      M.state.debug = true
+    end
+    vim.notify("Gtags debug toggled: " .. tostring(M.state.debug), vim.log.levels.INFO)
+  end, { desc = "Toggle gtags debug" })
+
   vim.api.nvim_create_user_command("GtagsGenerate", function()
     M.regenerate()
   end, { desc = "Regenerate gtags database" })
@@ -208,7 +250,7 @@ function M.setup(opts)
   if opts then
     M.config = vim.tbl_deep_extend("force", M.config, opts)
   end
-  M.state.steuped = true
+  M.state.steup = true
   M.setup_autocmds()
   M.setup_commands()
 end

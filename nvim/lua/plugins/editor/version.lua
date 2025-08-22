@@ -8,7 +8,7 @@ return {
       vim.g.signify_sign_add = "▎"
       vim.g.signify_sign_change = "▎"
       vim.g.signify_sign_delete = ""
-      vim.g.signify_priority = 1
+      vim.g.signify_priority = 1000
       -- vim.g.signify_vcs_cmds_diffmode = {
       --   git = 'git show HEAD:./%f | tr -d "\r"',
       --   svn = 'svn cat %f | tr -d "\r"',

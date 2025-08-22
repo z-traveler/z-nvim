@@ -111,10 +111,10 @@ vim.g.autoformat = false
 -- spell
 vim.opt_local.spell = false
 vim.cmd([[
-  iabbrev adn and
-  iabbrev calss class
-  iabbrev sefl self
-  iabbrev NOne None
+  inoreabbrev adn and
+  inoreabbrev calss class
+  inoreabbrev sefl self
+  inoreabbrev NOne None
 ]])
 
 require("config.editor.gtag").setup()
