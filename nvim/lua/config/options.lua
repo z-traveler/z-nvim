@@ -113,7 +113,6 @@ vim.opt_local.spell = false
 vim.cmd([[
   inoreabbrev adn and
   inoreabbrev calss class
-  inoreabbrev sefl self
   inoreabbrev NOne None
 ]])
 

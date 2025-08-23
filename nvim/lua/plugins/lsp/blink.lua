@@ -34,7 +34,7 @@ return {
         keymap = {
           preset = "none",
           ["<C-e>"] = { "cancel", "hide", "fallback" },
-          ["<enter>"] = { "select_and_accept", "snippet_forward", "fallback" },
+          ["<enter>"] = { "snippet_forward", "fallback" },
           ["<C-j>"] = { "select_and_accept", "snippet_forward", "fallback" },
           ["<C-k>"] = { "snippet_backward", "fallback" },
           ["<C-p>"] = { "select_prev", "fallback_to_mappings" },
