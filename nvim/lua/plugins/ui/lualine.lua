@@ -53,6 +53,7 @@ return {
             sources.dap,
             sources.treesitter,
             sources.lsp_clients,
+            require 'minuet.lualine'
           },
           lualine_y = {
             sources.noice_mode,
