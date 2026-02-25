@@ -30,6 +30,20 @@ map("n", "<leader>q", "q", { desc = "Vim Macro", noremap = true })
 map("n", "<A-w>", "<cmd>wincmd w<cr>", { desc = "Go to Window", noremap = true, silent = true })
 map("n", "<leader>wv", "<cmd>vs<cr>", { desc = "Split Right", noremap = true, silent = true })
 map("n", "<leader>ws", "<cmd>sp<cr>", { desc = "Split Down", noremap = true, silent = true })
+map("n", "<leader>wj", function()
+  local sep = 2
+  local total = vim.o.columns - sep
+  local side = math.floor(total * 3 / 10)
+
+  vim.cmd("vs | vs")
+  vim.cmd("wincmd t")
+  vim.cmd("vertical resize " .. side)
+  vim.cmd("wincmd b")
+  vim.cmd("vertical resize " .. side)
+  vim.cmd("wincmd t")
+  vim.cmd("wincmd l")
+end, { desc = "Split 3:4:3 (focus center)", noremap = true, silent = true })
+
 -- resize window
 map("n", "<A-up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height", silent = true })
 map("n", "<A-down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height", silent = true })
