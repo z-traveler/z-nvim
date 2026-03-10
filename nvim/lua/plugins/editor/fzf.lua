@@ -18,6 +18,20 @@ return {
       config.defaults.keymap.builtin["<c-b>"] = "preview-page-up"
       config.defaults.keymap.builtin["<c-f>"] = "preview-page-down"
 
+      -- trouble.nvim's ctrl-t action requires fzf >= 0.42 (uses `transform`).
+      if LazyVim.has("trouble.nvim") then
+        local fzf_ver = require("fzf-lua.utils").fzf_version()
+        if not fzf_ver or not vim.version.ge(fzf_ver, { 0, 42, 0 }) then
+          local ver_str = fzf_ver and table.concat(fzf_ver, ".") or "unknown"
+          vim.notify(
+            ("fzf version %s is too old for trouble.nvim ctrl-t (requires >= 0.42).\n"):format(ver_str)
+              .. "Upgrade: https://github.com/junegunn/fzf/releases",
+            vim.log.levels.WARN,
+            { title = "fzf-lua", once = true }
+          )
+        end
+      end
+
       local m_opts = {
         fzf_opts = {
           ["--layout"] = "default",

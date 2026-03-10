@@ -2,7 +2,7 @@ local colors = require("config.ui").colors
 local update_hl = require("config.ui").update_hl
 
 return {
-  { "echasnovski/mini.pairs", enabled = false },
+  { "nvim-mini/mini.pairs", enabled = false },
   {
     "saghen/blink.pairs",
     version = "*",

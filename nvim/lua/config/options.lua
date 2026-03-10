@@ -117,3 +117,15 @@ vim.cmd([[
 ]])
 
 require("config.editor.gtag").setup()
+
+-- lazygit is installed as "lg" instead of "lazygit".
+-- LazyVim/Snacks look for "lazygit" by name; create a symlink to fix:
+--   ln -sf $(which lg) ~/.local/bin/lazygit
+if vim.fn.executable("lazygit") == 0 and vim.fn.executable("lg") == 1 then
+  vim.notify(
+    "lazygit not found in PATH, but 'lg' is.\n"
+      .. "Run: ln -sf $(which lg) ~/.local/bin/lazygit",
+    vim.log.levels.WARN,
+    { title = "lazygit" }
+  )
+end

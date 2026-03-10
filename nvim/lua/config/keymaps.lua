@@ -3,7 +3,9 @@
 -- Add any additional keymaps here
 
 local map = vim.keymap.set
-local del = vim.keymap.del
+local del = function(mode, lhs, opts)
+  pcall(vim.keymap.del, mode, lhs, opts)
+end
 
 ---- operator
 map("i", "jk", "<ESC>", { desc = "Leave Insert", noremap = true, silent = true })
