@@ -31,7 +31,8 @@ M.sources = {
   treesitter = {
     function()
       local b = vim.api.nvim_get_current_buf()
-      if next(vim.treesitter.highlighter.active[b]) then
+      local active = vim.treesitter.highlighter.active
+      if active[b] and next(active[b]) then
         return ""
       end
       return ""

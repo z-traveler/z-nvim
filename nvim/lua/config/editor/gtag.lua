@@ -10,7 +10,7 @@ M.config = {
 }
 
 M.state = {
-  steup = false,
+  setup = false,
   update_timer = nil,
   is_generating = false,
   debug = false,
@@ -76,6 +76,12 @@ function M.generate_full(project_root, cache_path, callback)
 
   M.state.is_generating = true
   M.ensure_cache_dir(cache_path)
+  local timeout_timer = vim.fn.timer_start(60000, function()
+    M.state.is_generating = false
+    vim.schedule(function()
+      vim.notify("gtags generation timeout, state reset", vim.log.levels.WARN)
+    end)
+  end)
   local env = {
     GTAGSLABEL = M.config.gtagslabel,
     GTAGSCONF = M.config.gtagsconf,
@@ -84,6 +90,7 @@ function M.generate_full(project_root, cache_path, callback)
   vim.notify("Generating gtags database for project...", vim.log.levels.INFO)
 
   return M.async_execute(cmd, project_root, env, function(exit_code)
+    vim.fn.timer_stop(timeout_timer)
     M.state.is_generating = false
     if exit_code == 0 then
       vim.notify("GTAGS database generated successfully", vim.log.levels.INFO)
@@ -250,7 +257,7 @@ function M.setup(opts)
   if opts then
     M.config = vim.tbl_deep_extend("force", M.config, opts)
   end
-  M.state.steup = true
+  M.state.setup = true
   M.setup_autocmds()
   M.setup_commands()
 end

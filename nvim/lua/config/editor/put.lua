@@ -38,6 +38,9 @@ function M.locate()
           local filename = file_path:match(".*/(.*)") or file_path
           local rg_cmd = string.format("rg --files '%s' | grep -m 1 '%s$'", root_dir, filename)
           local handle = io.popen(rg_cmd)
+          if not handle then
+            goto continue
+          end
           local result = handle:read("*a")
           handle:close()
 
@@ -46,6 +49,7 @@ function M.locate()
             -- 如果找到匹配的文件，使用第一个匹配
             table.insert(items, { filename = match_files[1], lnum = tonumber(line_num) })
           end
+          ::continue::
         end
       end
     end
@@ -57,7 +61,7 @@ function M.locate()
   end
 
   if #items == 1 then
-    vim.cmd("edit " .. items[1].filename)
+    vim.cmd("edit " .. vim.fn.fnameescape(items[1].filename))
     vim.api.nvim_win_set_cursor(0, { items[1].lnum, 0 })
   elseif #items > 1 then
     vim.fn.setqflist(items)

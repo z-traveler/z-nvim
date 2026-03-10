@@ -24,9 +24,7 @@ return {
     "mfussenegger/nvim-dap",
     keys = {
       { "<leader>dl", function() require("dap").toggle_breakpoint("", "", vim.fn.input('Log: ')) end, desc = "Breakpoint Log" },
-      { "<leader>dd", function()  end, desc = "Breakpoint Log" },
       { "<leader>dk", function() cfg.custom_breakpoint("KK") end, desc = "KK" },
-      { "<leader>ds", function() cfg.custom_breakpoint("SS") end, desc = "SS" },
       { "<leader>ds", function() cfg.custom_breakpoint("SS") end, desc = "SS" },
       { "<leader>dS", function() cfg.custom_breakpoint("SSS") end, desc = "SSS" },
     }

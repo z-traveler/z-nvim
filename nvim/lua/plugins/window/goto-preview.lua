@@ -22,7 +22,7 @@ return {
       { "gl", "<cmd>lua require('goto-preview').goto_preview_definition()<cr>", desc = "Preview Define In Float" },
       { "gq", "<cmd>lua require('goto-preview').close_all_win()<cr>", desc = "Close All Preview Win" },
       -- stylua: ignore
-      { "<leader>wL", function () cfg.exchange_to_right() end, desc = "Move To Left Win"} ,
+      { "<leader>wL", function () cfg.exchange_to_right() end, desc = "Move To Right Win"} ,
       -- stylua: ignore
       { "<leader>wH", function () cfg.exchange_to_left() end, desc = "Move To Left Win"} ,
     },

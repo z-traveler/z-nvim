@@ -3,13 +3,31 @@ local M = {}
 local ns_id = vim.api.nvim_create_namespace("my_dap_namespace")
 local extmark_id_to_info = {}
 local dap_lock = false
+local dap_lock_timer = nil
+
+local function set_dap_lock(locked)
+  dap_lock = locked
+  if dap_lock_timer then
+    vim.fn.timer_stop(dap_lock_timer)
+    dap_lock_timer = nil
+  end
+  if locked then
+    dap_lock_timer = vim.fn.timer_start(10000, function()
+      dap_lock = false
+      dap_lock_timer = nil
+      vim.schedule(function()
+        vim.notify("DAP lock timeout, auto-reset", vim.log.levels.WARN, { title = "DAP" })
+      end)
+    end)
+  end
+end
 
 function M.clear_dap_all()
   for extmark_id, info in pairs(extmark_id_to_info) do
     local bufnr = info[1]
     vim.api.nvim_buf_del_extmark(bufnr, ns_id, extmark_id)
   end
-  dap_lock = false
+  set_dap_lock(false)
   extmark_id_to_info = {}
 end
 
@@ -41,7 +59,7 @@ function M.custom_breakpoint(breakpoint)
 
   if cancel_info then
     -- 取消
-    dap_lock = true
+    set_dap_lock(true)
     dap.pause(0) -- like ctrl-c, pause all threads
     dap.listeners.after.event_stopped["z.pause"] = function(_, _)
       dap.listeners.after.event_stopped["z.pause"] = nil
@@ -60,7 +78,7 @@ function M.custom_breakpoint(breakpoint)
             print("continue")
             vim.api.nvim_buf_del_extmark(bufnr, ns_id, cancel_info[1])
             extmark_id_to_info[cancel_info[1]] = nil
-            dap_lock = false
+            set_dap_lock(false)
           end
         end
       end
@@ -89,7 +107,7 @@ function M.custom_breakpoint(breakpoint)
     }, {
       prompt = "🐤 ",
       on_submit = function(value)
-        dap_lock = true
+        set_dap_lock(true)
         dap.pause(0)
         dap.listeners.after.event_stopped["z.pause"] = function(_, _)
           dap.listeners.after.event_stopped["z.pause"] = nil
@@ -118,7 +136,7 @@ function M.custom_breakpoint(breakpoint)
                 })
                 extmark_id_to_info[extmark_id] = { bufnr, row, breakpoint, breakpoint_id }
                 print(vim.inspect(extmark_id_to_info[extmark_id]))
-                dap_lock = false
+                set_dap_lock(false)
               end
             end
           end
@@ -141,20 +159,11 @@ function M.custom_breakpoint(breakpoint)
   end
 end
 
-local function clear_dap_all()
-  for extmark_id, info in pairs(extmark_id_to_info) do
-    local bufnr = info[1]
-    vim.api.nvim_buf_del_extmark(bufnr, ns_id, extmark_id)
-  end
-  dap_lock = false
-  extmark_id_to_info = {}
-end
-
 function M.clear_all()
     local dap, dapui = require("dap"), require("dapui")
     dap.disconnect();
     dapui.close()
-    clear_dap_all()
+    M.clear_dap_all()
     vim.opt.mouse = ""
 end
 

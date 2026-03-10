@@ -30,7 +30,7 @@ return {
             ["<up>"] = { query = { "@function.outer", "@class.outer" } },
             ["<left>"] = { query = { "@block.outer", "@conditional.outer", "@loop.outer", "@parameter.inner" } },
             ["[m"] = { query = { "@function.outer", "@class.outer" } },
-            ["]a"] = { query = { "@parameter.inner" } },
+            ["[a"] = { query = { "@parameter.inner" } },
           },
         },
         include_surrounding_whitespace = true,

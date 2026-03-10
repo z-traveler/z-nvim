@@ -31,20 +31,18 @@ function M.buf_kill(kill_command, bufnr, force)
     local warning
     if bo[bufnr].modified then
       warning = fmt([[No write since last change for (%s)]], fnamemodify(bufname, ":t"))
-    elseif api.nvim_buf_get_option(bufnr, "buftype") == "terminal" then
+    elseif bo[bufnr].buftype == "terminal" then
       warning = fmt([[Terminal %s will be killed]], bufname)
     end
     if warning then
       vim.ui.input({
         prompt = string.format([[%s. Close it anyway? [y]es or [n]o (default: no): ]], warning),
       }, function(choice)
-        if choice:match("ye?s?") then
-          force = true
+        if choice and choice:match("ye?s?") then
+          M.buf_kill(kill_command, bufnr, true)
         end
       end)
-      if not force then
-        return
-      end
+      return
     end
   end
 

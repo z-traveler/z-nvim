@@ -1,14 +1,14 @@
-_G.exclude_dirs = {
+local M = {}
+
+M.exclude_dirs = {
   "*.pyc",
   "*.pyo",
   "*.so",
   "*.o",
 }
-function _G.add_exclude_dirs(dir)
-  table.insert(_G.exclude_dirs, dir)
+function M.add_exclude_dirs(dir)
+  table.insert(M.exclude_dirs, dir)
 end
-
-local M = {}
 
 M.start_grep_inselected_dirs = function(dirs)
   local rg_globs = ""
@@ -54,8 +54,8 @@ function M.files_excluded()
   local fzf = require("fzf-lua")
   local config = fzf.config
   local fd_opts = config.defaults.files.fd_opts
-  if _G.exclude_dirs then
-    for _, dir in ipairs(_G.exclude_dirs) do
+  if M.exclude_dirs then
+    for _, dir in ipairs(M.exclude_dirs) do
       fd_opts = fd_opts .. " --exclude '" .. dir .. "'"
     end
   end
@@ -65,7 +65,7 @@ end
 function M.rg_excluded(visual)
   local fzf = require("fzf-lua")
   local rg_globs = ""
-  for _, dir in ipairs(_G.exclude_dirs) do
+  for _, dir in ipairs(M.exclude_dirs) do
     if dir:match("/$") then
       rg_globs = rg_globs .. " -g '!" .. dir .. "**'"
     else
@@ -102,7 +102,7 @@ function M.live_grep(visual)
   })
 end
 
-function _G.cascade_grep()
+function M.cascade_grep()
   local fzf_lua = require("fzf-lua")
 
   -- 第一次搜索

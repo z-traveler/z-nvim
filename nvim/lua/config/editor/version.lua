@@ -1,13 +1,20 @@
 local M = {}
 
+local _cached_vcs = nil
+
 function M.get_repo_version_manager()
-  local git_dir = vim.fn.system("git rev-parse --is-inside-work-tree")
-  local svn_dir = vim.fn.system("svn info")
-  if string.find(git_dir, "true") then
-    return "git"
+  if _cached_vcs then
+    return _cached_vcs
   end
-  if string.find(svn_dir, "Path:") then
-    return "svn"
+  local git_dir = vim.fn.system("git rev-parse --is-inside-work-tree")
+  if vim.v.shell_error == 0 and string.find(git_dir, "true") then
+    _cached_vcs = "git"
+    return _cached_vcs
+  end
+  local svn_dir = vim.fn.system("svn info")
+  if vim.v.shell_error == 0 and string.find(svn_dir, "Path:") then
+    _cached_vcs = "svn"
+    return _cached_vcs
   end
 end
 
