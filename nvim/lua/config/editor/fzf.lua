@@ -205,7 +205,7 @@ function M.gtag_grep()
   local function build_actions()
     local actions = {}
     for param, info in pairs(query_params) do
-      actions[info.key] = { fn = toggle_param(param), reload = true }
+      actions[info.key] = { fn = toggle_param(param) }
     end
     return actions
   end

@@ -2,10 +2,11 @@ local colors = require("config.ui").colors
 local update_hl = require("config.ui").update_hl
 
 return {
-  { "nvim-mini/mini.pairs", enabled = false },
+  { "nvim-mini/mini.pairs", enabled = true },
   {
     "saghen/blink.pairs",
     version = "*",
+    enabled = false,
     dependencies = "saghen/blink.download",
     opts = function(_, opts)
       vim.api.nvim_create_autocmd({ "User" }, {

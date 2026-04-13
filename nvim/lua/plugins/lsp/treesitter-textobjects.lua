@@ -35,6 +35,13 @@ return {
         },
         include_surrounding_whitespace = true,
       },
+    },
+  },
+  -- incremental_selection 已从 nvim-treesitter main 分支移除，使用独立插件替代
+  {
+    "MeanderingProgrammer/treesitter-modules.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {
       incremental_selection = {
         enable = true,
         keymaps = {

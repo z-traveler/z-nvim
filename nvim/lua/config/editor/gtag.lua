@@ -2,17 +2,20 @@ local M = {}
 
 M.config = {
   bin = "gtags",
-  gtagslabel = "native-pygments",
+  gtagslabel = "pygments",
   gtagsconf = vim.fn.expand("$HOME/share/gtags/gtags.conf"),
   cache_dir = vim.fn.stdpath("data") .. "/gtags/",
   filetypes = { "python", "javascript", "typescript", "c", "cpp", "rust", "go", "java" },
   root_markers = { ".git", ".svn", ".lazy.lua" },
+  skip_patterns = {}, -- 排除路径模式，如 {"*/Data/*", "*/Lib/*"}
+  max_filesize = nil, -- 排除超大文件，如 "500k"
 }
 
 M.state = {
   setup = false,
   update_timer = nil,
   is_generating = false,
+  generation_failed = false, -- 生成失败/超时后禁止自动重试，需手动 :GtagsGenerate
   debug = false,
 }
 
@@ -44,25 +47,30 @@ function M.has_gtags_db(cache_path)
 end
 
 function M.async_execute(cmd, cwd, env, callback)
+  -- 合并自定义环境变量到系统环境，避免丢失 PATH 等
+  local merged_env = vim.fn.environ()
+  if env then
+    for k, v in pairs(env) do
+      merged_env[k] = v
+    end
+  end
+  local stderr_buf = {}
   local job_id = vim.fn.jobstart(cmd, {
     cwd = cwd,
-    env = env,
+    env = merged_env,
     on_exit = function(_, exit_code)
       vim.schedule(function()
         if callback then
-          callback(exit_code)
+          callback(exit_code, stderr_buf)
         end
       end)
     end,
-    on_stdout = function(_, data)
-      -- 可选：处理输出
-    end,
+    on_stdout = function(_, data) end,
     on_stderr = function(_, data)
-      -- 可选：处理错误输出
-      if #data > 1 or (data[1] and data[1] ~= "") then
-        vim.schedule(function()
-          vim.notify("gtags error: " .. table.concat(data, "\n"), vim.log.levels.WARN)
-        end)
+      for _, line in ipairs(data) do
+        if line ~= "" then
+          table.insert(stderr_buf, line)
+        end
       end
     end,
   })
@@ -76,26 +84,62 @@ function M.generate_full(project_root, cache_path, callback)
 
   M.state.is_generating = true
   M.ensure_cache_dir(cache_path)
-  local timeout_timer = vim.fn.timer_start(60000, function()
+  local job_id
+  local timed_out = false
+  local timeout_timer = vim.fn.timer_start(600000, function()
+    timed_out = true
     M.state.is_generating = false
+    M.state.generation_failed = true
+    if job_id then
+      vim.fn.jobstop(job_id)
+    end
     vim.schedule(function()
-      vim.notify("gtags generation timeout, state reset", vim.log.levels.WARN)
+      vim.notify("gtags generation timeout (10min), killed. Run :GtagsGenerate to retry.", vim.log.levels.WARN)
     end)
   end)
   local env = {
+    GTAGSROOT = project_root,
+    GTAGSDBPATH = cache_path,
     GTAGSLABEL = M.config.gtagslabel,
     GTAGSCONF = M.config.gtagsconf,
   }
-  local cmd = { M.config.bin, cache_path }
+
+  -- 有过滤配置时，先用 find 生成文件列表（相对路径，pygments 需要）
+  local cmd = { M.config.bin }
+  if #M.config.skip_patterns > 0 or M.config.max_filesize then
+    local list_path = cache_path .. "gtags.files"
+    local find_parts = { "find", vim.fn.shellescape(project_root), "-not -path '*/.svn/*'", "-type f" }
+    for _, pat in ipairs(M.config.skip_patterns) do
+      table.insert(find_parts, "-not -path " .. vim.fn.shellescape(pat))
+    end
+    if M.config.max_filesize then
+      table.insert(find_parts, "-size -" .. M.config.max_filesize)
+    end
+    -- 转换为相对路径（去掉 project_root 前缀）
+    local strip = vim.fn.shellescape("s|^" .. project_root .. "/||")
+    local find_cmd = table.concat(find_parts, " ") .. " 2>/dev/null | sed " .. strip .. " > " .. vim.fn.shellescape(list_path)
+    vim.fn.system(find_cmd)
+    table.insert(cmd, "-f")
+    table.insert(cmd, list_path)
+  end
+  table.insert(cmd, cache_path)
   vim.notify("Generating gtags database for project...", vim.log.levels.INFO)
 
-  return M.async_execute(cmd, project_root, env, function(exit_code)
+  job_id = M.async_execute(cmd, project_root, env, function(exit_code, stderr)
     vim.fn.timer_stop(timeout_timer)
     M.state.is_generating = false
+    if timed_out then
+      return
+    end
     if exit_code == 0 then
       vim.notify("GTAGS database generated successfully", vim.log.levels.INFO)
     else
-      vim.notify("Failed to generate GTAGS database", vim.log.levels.ERROR)
+      M.state.generation_failed = true
+      local msg = "Failed to generate GTAGS database"
+      if #stderr > 0 then
+        msg = msg .. "\n" .. table.concat(stderr, "\n")
+      end
+      vim.notify(msg, vim.log.levels.ERROR)
     end
     if callback then
       callback(exit_code)
@@ -122,7 +166,7 @@ function M.update_incremental(opts)
 
   local cmd
   if filepath then
-    local relative_path = vim.fn.fnamemodify(filepath, ":~:.")
+    local relative_path = filepath:sub(#project_root + 2)
     cmd = { "global", "--single-update", relative_path }
   else
     cmd = { "global", "-u" }
@@ -132,7 +176,7 @@ function M.update_incremental(opts)
     vim.notify("Updating gtags database with incremental..." .. vim.inspect(cmd), vim.log.levels.DEBUG)
   end
   local st = vim.loop.hrtime()
-  return M.async_execute(cmd, project_root, env, function(exit_code)
+  return M.async_execute(cmd, project_root, env, function(exit_code, stderr)
     local et = vim.loop.hrtime()
     local dr = (et - st) / 1000000
     if exit_code == 0 then
@@ -143,13 +187,20 @@ function M.update_incremental(opts)
         callback(exit_code)
       end
     else
-      vim.notify("Failed to update GTAGS database", vim.log.levels.WARN)
+      local msg = "Failed to update GTAGS database"
+      if #stderr > 0 then
+        msg = msg .. "\n" .. table.concat(stderr, "\n")
+      end
+      vim.notify(msg, vim.log.levels.WARN)
     end
   end)
 end
 
 function M.update_or_generate(opts)
   if M.state.is_generating then
+    return
+  end
+  if M.state.generation_failed then
     return
   end
 
@@ -191,6 +242,7 @@ end
 function M.regenerate()
   local project_root = M.get_project_root()
   local cache_path = M.get_cache_path(project_root)
+  M.state.generation_failed = false
   vim.fn.delete(cache_path, "rf")
   M.generate_full(project_root, cache_path)
 end
