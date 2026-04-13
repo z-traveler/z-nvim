@@ -143,14 +143,16 @@ function M.gtag_grep()
 
   local fzf = require("fzf-lua")
   local func = fzf.live_grep
+  local project_root = gtags_env.GTAGSROOT
 
   local env_str = ""
   for k, v in pairs(gtags_env) do
-    env_str = env_str .. k .. "=" .. v .. " "
+    env_str = env_str .. k .. "=" .. vim.fn.shellescape(v) .. " "
   end
 
   local base_cmd = env_str .. "global --color=always --result=grep -i"
-  local ctx = string.format(" %d:%s", vim.fn.line("."), vim.fn.expand("%p"))
+  -- --from-here 用绝对路径，格式 =lno:path
+  local ctx = string.format("=%d:%s", vim.fn.line("."), vim.fn.expand("%:p"))
   local cword = vim.fn.expand("<cword>") or ""
 
   local query_params = {
@@ -159,7 +161,7 @@ function M.gtag_grep()
     ["-r"] = { active = false, desc = "ref", key = "ctrl-r" },
   }
 
-  if cword then
+  if cword ~= "" then
     query_params["--from-here"].active = true
   else
     query_params["-d"].active = true
@@ -180,10 +182,9 @@ function M.gtag_grep()
 
   local function build_header()
     local status = {}
-    local green = "\27[32m" -- 绿色
-    local gray = "\27[90m" -- 灰色
-    local reset = "\27[0m" -- 重置颜色
-
+    local green = "\27[32m"
+    local gray = "\27[90m"
+    local reset = "\27[0m"
     local no_active = true
     for _, info in pairs(query_params) do
       if info.active then
@@ -193,7 +194,6 @@ function M.gtag_grep()
     if no_active then
       query_params["-d"].active = true
     end
-
     for _, info in pairs(query_params) do
       local indicator = info.active and "●" or "○"
       local color = info.active and green or gray
@@ -202,16 +202,10 @@ function M.gtag_grep()
     return table.concat(status, " | ")
   end
 
-  local function build_actions()
-    local actions = {}
-    for param, info in pairs(query_params) do
-      actions[info.key] = { fn = toggle_param(param) }
-    end
-    return actions
-  end
+  local build_actions -- forward decl
 
-  function toggle_param(target_param)
-    return function(opts)
+  local function toggle_param(target_param)
+    return function()
       if query_params[target_param].active then
         query_params[target_param].active = false
       else
@@ -219,30 +213,32 @@ function M.gtag_grep()
           info.active = (param == target_param)
         end
       end
-
-      -- 重新启动 fzf
       func({
         resume = true,
         cmd = build_cmd(),
+        cwd = project_root,
         actions = build_actions(),
         prompt = "gtag> ",
         header = build_header(),
-        fn_transform = function(x)
-          return x:gsub("%s+", " ")
-        end,
       })
     end
+  end
+
+  build_actions = function()
+    local actions = {}
+    for param, info in pairs(query_params) do
+      actions[info.key] = { fn = toggle_param(param) }
+    end
+    return actions
   end
 
   func({
     cmd = build_cmd(),
     query = cword,
+    cwd = project_root,
     actions = build_actions(),
     prompt = "gtag> ",
     header = build_header(),
-    fn_transform = function(x)
-      return x:gsub("%s+", " ")
-    end,
   })
 end
 
