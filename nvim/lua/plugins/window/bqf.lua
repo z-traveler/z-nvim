@@ -11,6 +11,8 @@ return {
       { "<A-o>", function() bqf_cfg.toggle_loclist() end, desc = "Toggle Loclist "},
       { "]q", "<cmd>cnext<cr>", desc = "Next Item" },
       { "[q", "<cmd>cprev<cr>", desc = "Prev Item" },
+      { "]Q", "<cmd>cnewer<cr>", desc = "Newer Quickfix List" },
+      { "[Q", "<cmd>colder<cr>", desc = "Older Quickfix List" },
     },
   },
 }

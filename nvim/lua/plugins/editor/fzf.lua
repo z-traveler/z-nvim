@@ -118,6 +118,8 @@ return {
       -- help
       { "<leader>sH", "<cmd>FzfLua help_tags<cr>", desc = "Help Pages" },
       { "<leader>sK", "<cmd>FzfLua keymaps<cr>", desc = "Key Maps" },
+      -- quickfix
+      { "<leader>fQ", "<cmd>FzfLua quickfix_stack<cr>", desc = "Quickfix Stack" },
     },
   },
   {
