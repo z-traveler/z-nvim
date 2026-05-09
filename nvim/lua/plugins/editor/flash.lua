@@ -8,9 +8,9 @@ return {
       vim.api.nvim_create_autocmd({ "User" }, {
         pattern = "LazyLoad",
         callback = function(event)
-          ui.update_hl("FlashMatch", { fg = colors.dim_yellow, bg = colors.color_bg, bold = true })
-          ui.update_hl("FlashCurrent", { fg = colors.dim_yellow, bg = colors.color_bg, bold = true })
-          ui.update_hl("FlashLabel", { fg = colors.light_cyan, bold = true, italic = true, underline = true })
+          ui.update_hl("FlashMatch", { fg = colors.cyan, underline = true })
+          ui.update_hl("FlashCurrent", { fg = colors.orange, bg = colors.dark_fg, bold = true })
+          ui.update_hl("FlashLabel", { fg = colors.color_bg, bg = colors.yellow, bold = true })
         end,
         once = true,
       })
