@@ -62,21 +62,6 @@ vim.opt.jumpoptions = "clean" -- <c-o>不会跳回到被卸载的buffer
 -- input
 vim.opt.mouse = ""
 vim.opt.clipboard = "unnamedplus"
--- WSL剪贴板特殊配置
-if vim.fn.has("wsl") == 1 then
-  vim.g.clipboard = {
-    name = "WslClipboard",
-    copy = {
-      ["+"] = "clip.exe",
-      ["*"] = "clip.exe",
-    },
-    paste = {
-      ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-      ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-    },
-    cache_enabled = 0,
-  }
-end
 
 -- 括号, 禁用匹配括号高亮（性能优化）
 -- 禁用自动注释延续
