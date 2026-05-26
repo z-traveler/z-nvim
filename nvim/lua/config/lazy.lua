@@ -14,6 +14,11 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+if not string.find(vim.env.PATH or "", mason_bin, 1, true) then
+  vim.env.PATH = mason_bin .. ":" .. (vim.env.PATH or "")
+end
+
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins

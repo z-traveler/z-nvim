@@ -1,6 +1,9 @@
 return {
   {
     "ThePrimeagen/refactoring.nvim",
+    dependencies = {
+      "lewis6991/async.nvim",
+    },
     lazy = false,
     keys = {
       { "<leader>rs", false, mode = { "n", "v" } },
