@@ -1,6 +1,9 @@
 return {
   {
     "Mythos-404/xmake.nvim",
+    cond = function()
+      return vim.fn.executable("xmake") == 1
+    end,
     lazy = true,
     event = "VeryLazy",
     opts = {
