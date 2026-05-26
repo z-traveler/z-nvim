@@ -64,6 +64,7 @@ vim.opt.jumpoptions = "clean" -- <c-o>不会跳回到被卸载的buffer
 
 -- input
 vim.opt.mouse = ""
+require("config.clipboard").setup()
 vim.opt.clipboard = "unnamedplus"
 
 -- 括号, 禁用匹配括号高亮（性能优化）
