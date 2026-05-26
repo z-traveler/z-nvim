@@ -439,7 +439,7 @@ lemonade paste
 | `Z_NVIM_CLIPBOARD=off` | 不设置自定义 clipboard provider |
 | `Z_NVIM_LEMONADE_HOST=127.0.0.1` | Lemonade tunnel 检测 host |
 | `Z_NVIM_LEMONADE_PORT=2489` | Lemonade tunnel 检测 port |
-| `Z_NVIM_LEMONADE_DETECT_TIMEOUT=0.1s` | Lemonade 探测超时 |
+| `Z_NVIM_LEMONADE_DETECT_TIMEOUT=1s` | Lemonade 探测超时 |
 
 Neovim 内验证：
 

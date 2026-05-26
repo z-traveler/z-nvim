@@ -1,10 +1,10 @@
 local M = {}
 
-local function detect_timeout_ms()
-  local timeout = vim.env.Z_NVIM_LEMONADE_DETECT_TIMEOUT or "0.1s"
+local function timeout_ms()
+  local timeout = vim.env.Z_NVIM_LEMONADE_DETECT_TIMEOUT or "1s"
   local value, unit = timeout:match("^(%d+%.?%d*)([smhd]?)$")
   if not value then
-    return 100
+    return 1000
   end
 
   local seconds = tonumber(value)
@@ -18,6 +18,18 @@ local function detect_timeout_ms()
   return math.max(1, math.floor(seconds * 1000))
 end
 
+local function lemonade_host()
+  return vim.env.Z_NVIM_LEMONADE_HOST or "127.0.0.1"
+end
+
+local function lemonade_port()
+  return vim.env.Z_NVIM_LEMONADE_PORT or "2489"
+end
+
+local function lemonade_cmd(subcmd)
+  return { "lemonade", "--host=" .. lemonade_host(), "--port=" .. lemonade_port(), subcmd }
+end
+
 local function setup_xsel()
   if vim.env.DISPLAY and vim.env.DISPLAY ~= "" and vim.fn.executable("xsel") == 1 then
     vim.g.clipboard = "xsel"
@@ -27,19 +39,14 @@ local function setup_xsel()
 end
 
 local function lemonade_tunnel_ready()
-  if vim.fn.executable("nc") ~= 1 then
+  if vim.fn.executable("lemonade") ~= 1 then
     return false
   end
 
-  local host = vim.env.Z_NVIM_LEMONADE_HOST or "127.0.0.1"
-  local port = vim.env.Z_NVIM_LEMONADE_PORT or "2489"
-  local port_check = vim.system({ "nc", "-z", "-w", "1", host, port }):wait()
-  if port_check.code ~= 0 then
-    return false
-  end
-
-  local probe = vim.system({ "lemonade", "paste" }, { text = false })
-  local result = probe:wait(detect_timeout_ms())
+  -- Do NOT use nc/telnet to probe lemonade: a bare TCP connection can wedge
+  -- lemonade's RPC server. Probe with a real lemonade RPC and a sane timeout.
+  local probe = vim.system(lemonade_cmd("paste"), { text = false })
+  local result = probe:wait(timeout_ms())
   if not result then
     probe:kill(15)
     return false
@@ -52,12 +59,23 @@ local function setup_lemonade(force)
     return false
   end
 
-  if force or lemonade_tunnel_ready() then
-    vim.g.clipboard = "lemonade"
-    return true
+  if not force and not lemonade_tunnel_ready() then
+    return false
   end
 
-  return false
+  vim.g.clipboard = {
+    name = "lemonade",
+    copy = {
+      ["+"] = lemonade_cmd("copy"),
+      ["*"] = lemonade_cmd("copy"),
+    },
+    paste = {
+      ["+"] = lemonade_cmd("paste"),
+      ["*"] = lemonade_cmd("paste"),
+    },
+    cache_enabled = 0,
+  }
+  return true
 end
 
 function M.setup()
