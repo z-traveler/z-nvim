@@ -3,6 +3,10 @@ return {
     "snacks.nvim",
     opts = {
       dashboard = {
+        -- Keep pane width in sync with the 63-column header. Snacks uses this
+        -- width to place pane 2 on rows where pane 1 has no content; if it is
+        -- narrower than the header, right-pane sections drift after the header.
+        width = 63,
         preset = {
           header = [[
                                                         000001001001110000                                                       
@@ -114,7 +118,7 @@ return {
 @@@@@@@@@@@@@@@@@@@%-.::::::::::::::::..:::::::::::::::=#@@@@@@
 @@@@@@@@@@@@@@@@@@@*++++++=+*****=+++++++%%%@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@%%#******++=====+*******+--==++*********##%%@@@@@@@@@
-          ]]
+          ]],
         },
         sections = {
           { section = "header" },
