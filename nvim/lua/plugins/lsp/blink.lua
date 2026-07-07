@@ -2,7 +2,6 @@ return {
   {
     "saghen/blink.cmp",
     version = "*",
-    build = "cargo build --release",
     opts = function(_, opts)
       vim.api.nvim_create_autocmd({ "User" }, {
         pattern = "LazyLoad",

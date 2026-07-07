@@ -1,2 +1,5 @@
 .omc
 .omx
+
+# Local Lazy.nvim lockfile
+/nvim/lazy-lock.json
