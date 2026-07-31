@@ -2,6 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     version = "*",
+    dependencies = { "mgalliou/blink-cmp-tmux" },
     opts = function(_, opts)
       vim.api.nvim_create_autocmd({ "User" }, {
         pattern = "LazyLoad",
@@ -13,13 +14,17 @@ return {
       if not vim.tbl_contains(source_default, "minuet") then
         table.insert(source_default, "minuet")
       end
+      if not vim.tbl_contains(source_default, "tmux") then
+        table.insert(source_default, "tmux")
+      end
       LazyVim.config.icons.kinds["Minuet"] = "♫ "
       local m_opts = {
         appearance = {
           use_nvim_cmp_as_default = true,
           kind_icons = {
-            claude = "♫ "
-          }
+            claude = "♫ ",
+            Tmux = " ",
+          },
         },
         completion = {
           ghost_text = {
@@ -56,6 +61,11 @@ return {
         sources = {
           default = source_default,
           providers = {
+            tmux = {
+              module = "blink-cmp-tmux",
+              name = "tmux",
+              kind = "Tmux",
+            },
             minuet = {
               enabled = false,
               name = "minuet",

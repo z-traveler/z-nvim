@@ -17,7 +17,8 @@ return {
   {
     "saghen/blink.pairs",
     version = "*",
-    dependencies = "saghen/blink.download",
+    dependencies = "saghen/blink.lib",
+    build = function() require("blink.pairs").download():pwait(60000) end,
     opts = function(_, opts)
       apply_highlights()
       vim.api.nvim_create_autocmd({ "ColorScheme" }, {
