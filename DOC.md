@@ -8,6 +8,7 @@
 
 ## 目录
 
+- [Codex / Claude Code Prompt Editor](#codex--claude-code-prompt-editor)
 - [模式切换](#模式切换)
 - [光标移动与编辑](#光标移动与编辑)
 - [窗口管理](#窗口管理)
@@ -30,6 +31,23 @@
 - [其他工具](#其他工具)
 - [FZF 内部快捷键](#fzf-内部快捷键)
 - [Which-Key 分组一览](#which-key-分组一览)
+
+---
+
+## Codex / Claude Code Prompt Editor
+
+`omni-prompt-editor` 由 lazy.nvim 从 `z-traveler/omni-hooks` 安装。按 `Ctrl+G` 打开临时输入文件时，
+它会在上方显示上一条回答，下方保留当前输入。
+
+新机器拉取配置后执行：
+
+```bash
+nvim --headless "+Lazy! sync" +qa
+~/.codex/switch-config.sh <profile>
+~/.claude/switch-settings.sh <profile> --force
+```
+
+后两条命令将各自的 static hook 配置重新生成到当前运行配置。运行时还需要 `bash`、`jq` 和 `ps`。
 
 ---
 
