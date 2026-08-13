@@ -27,8 +27,8 @@ return {
             and vim.api.nvim_buf_get_name(buf) == ""
           then
             local name = ("omni-prompt-answer-%d.md"):format(vim.fn.getpid())
-            vim.bo[buf].buftype = ""
             vim.api.nvim_buf_set_name(buf, vim.fs.joinpath(vim.fn.stdpath("run"), name))
+            vim.b[buf].omni_prompt_answer = true
             vim.lsp.start(marksman, { bufnr = buf })
           end
         end
