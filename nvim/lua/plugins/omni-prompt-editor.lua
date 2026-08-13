@@ -11,30 +11,40 @@ return {
       package.loaded["omni-prompt-editor"] = module
       module.setup()
 
+      local function attach_marksman()
+        local marksman = vim.lsp.config.marksman
+        if not marksman then
+          return
+        end
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if
+            vim.api.nvim_buf_is_loaded(buf)
+            and vim.bo[buf].filetype == "markdown"
+            and vim.bo[buf].buftype == "nowrite"
+            and vim.bo[buf].bufhidden == "wipe"
+            and vim.bo[buf].readonly
+            and not vim.bo[buf].modifiable
+            and vim.api.nvim_buf_get_name(buf) == ""
+          then
+            local name = ("omni-prompt-answer-%d.md"):format(vim.fn.getpid())
+            vim.api.nvim_buf_set_name(buf, vim.fs.joinpath(vim.fn.stdpath("run"), name))
+            vim.lsp.start(marksman, { bufnr = buf })
+          end
+        end
+      end
+
       vim.api.nvim_create_autocmd("VimEnter", {
         once = true,
         callback = function()
-          vim.schedule(function()
-            local marksman = vim.lsp.config.marksman
-            if not marksman then
-              return
-            end
-            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-              if
-                vim.api.nvim_buf_is_loaded(buf)
-                and vim.bo[buf].filetype == "markdown"
-                and vim.bo[buf].buftype == "nowrite"
-                and vim.bo[buf].bufhidden == "wipe"
-                and vim.bo[buf].readonly
-                and not vim.bo[buf].modifiable
-                and vim.api.nvim_buf_get_name(buf) == ""
-              then
-                local name = ("omni-prompt-answer-%d.md"):format(vim.fn.getpid())
-                vim.api.nvim_buf_set_name(buf, vim.fs.joinpath(vim.fn.stdpath("run"), name))
-                vim.lsp.start(marksman, { bufnr = buf })
-              end
-            end
-          end)
+          vim.schedule(attach_marksman)
+        end,
+      })
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "LazyLoad",
+        callback = function(event)
+          if event.data == "nvim-lspconfig" then
+            vim.schedule(attach_marksman)
+          end
         end,
       })
     end,
