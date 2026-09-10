@@ -424,7 +424,7 @@ Inlay hints 在编辑时自动隐藏（InsertEnter 禁用，InsertLeave 恢复�
 
 ### SSH / Windows 剪贴板
 
-默认优先使用 `lemonade` 作为 SSH 到 Windows 场景的双向剪贴板 provider；当远端没有 `lemonade`、`127.0.0.1:2489` tunnel 不通，或 Lemonade 短超时探测没有返回时，才 fallback 到 `xsel + X11`。优先级固定为 `lemonade > xsel`。
+默认使用 `lemonade` 作为 SSH 到 Windows 场景的双向剪贴板 provider。启动时不探测 tunnel，因此先启动 Neovim、后建立或重建 tunnel 都不需要重启 Neovim。复制异步执行；粘贴最多等待 500ms。连接失败后进入 5 秒冷却期，冷却期间直接失败，下次操作再自动重试。
 
 推荐链路：
 
@@ -446,18 +446,17 @@ command -v lemonade
 lemonade paste
 ```
 
-如果 Lemonade 不可用，fallback 需要 `DISPLAY` 和 `xsel`。`z-bootstrap` 的 `.bashrc.user` 会在 SSH 场景下从 `SSH_CLIENT` 派生 `DISPLAY`。
+需要使用 `xsel + X11` 时，通过 `Z_NVIM_CLIPBOARD=xsel` 显式选择。`z-bootstrap` 的 `.bashrc.user` 会在 SSH 场景下从 `SSH_CLIENT` 派生 `DISPLAY`。
 
 覆盖开关：
 
 | 环境变量 | 说明 |
 |----------|------|
-| `Z_NVIM_CLIPBOARD=lemonade` | 强制使用 Lemonade，不做 tunnel 探测 |
+| `Z_NVIM_CLIPBOARD=lemonade` | 显式选择 Lemonade |
 | `Z_NVIM_CLIPBOARD=xsel` | 强制使用 `xsel + X11` |
 | `Z_NVIM_CLIPBOARD=off` | 不设置自定义 clipboard provider |
-| `Z_NVIM_LEMONADE_HOST=127.0.0.1` | Lemonade tunnel 检测 host |
-| `Z_NVIM_LEMONADE_PORT=2489` | Lemonade tunnel 检测 port |
-| `Z_NVIM_LEMONADE_DETECT_TIMEOUT=1s` | Lemonade 探测超时 |
+| `Z_NVIM_LEMONADE_HOST=127.0.0.1` | Lemonade tunnel host |
+| `Z_NVIM_LEMONADE_PORT=2489` | Lemonade tunnel port |
 
 Neovim 内验证：
 

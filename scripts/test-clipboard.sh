@@ -3,61 +3,46 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 nvim_bin="${NVIM_BIN:-$(command -v nvim)}"
-tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"' EXIT
+test_tmp="$(mktemp -d)"
+trap 'rm -rf "$test_tmp"' EXIT
 
-run_lua() {
-  local path_value="$1"
-  local display_value="$2"
-  local lua_expr="$3"
-  shift 3
-  local test_cmd="package.path = '$repo_root/nvim/lua/?.lua;$repo_root/nvim/lua/?/init.lua;' .. package.path; require('config.clipboard').setup(); local ok, err = pcall(function() $lua_expr end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cquit') end"
-  if [[ -n "$display_value" ]]; then
-    env "$@" DISPLAY="$display_value" PATH="$path_value" "$nvim_bin" --clean --headless -u NONE \
-      "+lua $test_cmd" \
-      "+qa"
-  else
-    env "$@" -u DISPLAY PATH="$path_value" "$nvim_bin" --clean --headless -u NONE \
-      "+lua $test_cmd" \
-      "+qa"
-  fi
-}
-
-assert_lemonade="assert(type(vim.g.clipboard) == 'table', 'expected lemonade table provider'); assert(vim.g.clipboard.name == 'lemonade', 'expected lemonade provider name'); assert(vim.g.clipboard.copy['+'][1] == 'lemonade', 'expected lemonade copy command'); assert(vim.g.clipboard.copy['+'][2] == '--host=127.0.0.1', 'expected lemonade host option'); assert(vim.g.clipboard.copy['+'][3] == '--port=2489', 'expected lemonade port option'); assert(vim.g.clipboard.copy['+'][4] == 'copy', 'expected lemonade copy subcommand'); assert(vim.g.clipboard.paste['+'][4] == 'paste', 'expected lemonade paste subcommand')"
-
-mkdir -p "$tmp/bin" "$tmp/empty"
-cat >"$tmp/bin/xsel" <<'FAKE_XSEL'
+cat >"$test_tmp/lemonade" <<'FAKE_LEMONADE'
 #!/bin/sh
-exit 0
-FAKE_XSEL
-chmod +x "$tmp/bin/xsel"
-
-cat >"$tmp/bin/lemonade" <<'FAKE_LEMONADE'
-#!/bin/sh
-exit 0
-FAKE_LEMONADE
-chmod +x "$tmp/bin/lemonade"
-
-cat >"$tmp/bin/nc" <<'FAKE_NC'
-#!/bin/sh
-exit 97
-FAKE_NC
-chmod +x "$tmp/bin/nc"
-
-run_lua "$tmp/bin" "" "$assert_lemonade"
-run_lua "$tmp/bin" "10.226.150.62:0" "$assert_lemonade"
-
-cat >"$tmp/bin/lemonade" <<'SLOW_LEMONADE'
-#!/bin/sh
+printf '%s\n' "$@" >"$SSHL_TEST_ARGS"
 /bin/sleep 1
-exit 0
-SLOW_LEMONADE
-chmod +x "$tmp/bin/lemonade"
-run_lua "$tmp/bin" "10.226.150.62:0" "assert(vim.g.clipboard == 'xsel', 'slow lemonade probe must fall back to xsel')" Z_NVIM_LEMONADE_DETECT_TIMEOUT=0.05s
-run_lua "$tmp/bin" "10.226.150.62:0" "$assert_lemonade" Z_NVIM_CLIPBOARD=lemonade
+/bin/cat >"$SSHL_TEST_COPY_OUTPUT"
+FAKE_LEMONADE
+chmod +x "$test_tmp/lemonade"
 
-rm -f "$tmp/bin/lemonade"
-run_lua "$tmp/bin" "10.226.150.62:0" "assert(vim.g.clipboard == 'xsel', 'expected xsel fallback provider')"
-run_lua "$tmp/bin" "" "assert(vim.g.clipboard ~= 'xsel', 'xsel must not be selected without DISPLAY')"
-run_lua "$tmp/empty" "10.226.150.62:0" "assert(vim.g.clipboard ~= 'xsel', 'xsel must not be selected when xsel is missing')"
-run_lua "$tmp/bin" "10.226.150.62:0" "assert(vim.g.clipboard ~= 'xsel', 'clipboard provider should be disabled by override')" Z_NVIM_CLIPBOARD=off
+test_expr="package.path = '$repo_root/nvim/lua/?.lua;' .. package.path; require('config.clipboard').setup({ client = '$test_tmp/lemonade', timeout = 1500 }); local copy = vim.g.clipboard.copy['+']; local started = vim.uv.hrtime(); copy({ 'alpha', 'beta' }, 'V'); local elapsed = (vim.uv.hrtime() - started) / 1e6; assert(elapsed < 500, 'copy blocked for ' .. elapsed .. ' ms'); assert(vim.wait(2000, function() return vim.fn.filereadable('$test_tmp/copied') == 1 end), 'copy did not finish'); assert(vim.deep_equal(vim.fn.readfile('$test_tmp/copied'), { 'alpha', 'beta' }), 'copy changed clipboard text'); assert(vim.deep_equal(vim.fn.readfile('$test_tmp/args'), { '--host=127.0.0.1', '--port=2489', 'copy' }), 'copy used unexpected Lemonade arguments')"
+
+SSHL_TEST_ARGS="$test_tmp/args" SSHL_TEST_COPY_OUTPUT="$test_tmp/copied" \
+  "$nvim_bin" --clean --headless -u NONE \
+  "+lua local ok, err = pcall(function() $test_expr end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cquit') end" \
+  "+qa"
+
+cat >"$test_tmp/flaky-lemonade" <<'FAKE_LEMONADE'
+#!/bin/sh
+printf 'attempt\n' >>"$SSHL_TEST_ATTEMPTS"
+if [ -f "$SSHL_TEST_READY" ]; then
+  printf 'ready\n'
+  exit 0
+fi
+exec /bin/sleep 2
+FAKE_LEMONADE
+chmod +x "$test_tmp/flaky-lemonade"
+
+test_expr="package.path = '$repo_root/nvim/lua/?.lua;' .. package.path; require('config.clipboard').setup({ client = '$test_tmp/flaky-lemonade', timeout = 100, cooldown = 300 }); local paste = vim.g.clipboard.paste['+']; local started = vim.uv.hrtime(); local ok = pcall(paste); local elapsed = (vim.uv.hrtime() - started) / 1e6; assert(not ok, 'unavailable paste must fail'); assert(elapsed < 500, 'paste timeout took ' .. elapsed .. ' ms'); started = vim.uv.hrtime(); ok = pcall(paste); elapsed = (vim.uv.hrtime() - started) / 1e6; assert(not ok, 'paste during cooldown must fail'); assert(elapsed < 50, 'paste during cooldown took ' .. elapsed .. ' ms'); assert(#vim.fn.readfile('$test_tmp/attempts') == 1, 'cooldown started another client'); vim.fn.writefile({ 'ready' }, '$test_tmp/ready'); vim.wait(350); local value = paste(); assert(vim.deep_equal(value, { { 'ready' }, 'V' }), 'paste did not recover'); assert(#vim.fn.readfile('$test_tmp/attempts') == 2, 'paste did not retry after cooldown')"
+
+SSHL_TEST_ATTEMPTS="$test_tmp/attempts" SSHL_TEST_READY="$test_tmp/ready" \
+  "$nvim_bin" --clean --headless -u NONE \
+  "+lua local ok, err = pcall(function() $test_expr end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cquit') end" \
+  "+qa"
+
+rm -f "$test_tmp/attempts" "$test_tmp/ready"
+test_expr="package.path = '$repo_root/nvim/lua/?.lua;' .. package.path; require('config.clipboard').setup({ client = '$test_tmp/flaky-lemonade', timeout = 100, cooldown = 300 }); local notifications = {}; vim.notify = function(message) table.insert(notifications, message) end; local copy = vim.g.clipboard.copy['+']; local started = vim.uv.hrtime(); copy({ 'alpha' }, 'v'); local elapsed = (vim.uv.hrtime() - started) / 1e6; assert(elapsed < 50, 'unavailable copy blocked for ' .. elapsed .. ' ms'); assert(vim.wait(500, function() return #notifications == 1 end), 'copy failure was not reported'); copy({ 'beta' }, 'v'); vim.wait(50); assert(#vim.fn.readfile('$test_tmp/attempts') == 1, 'copy ignored cooldown'); assert(#notifications == 1, 'copy failure was reported repeatedly'); vim.fn.writefile({ 'ready' }, '$test_tmp/ready'); vim.wait(350); copy({ 'gamma' }, 'v'); assert(vim.wait(500, function() return #vim.fn.readfile('$test_tmp/attempts') == 2 end), 'copy did not retry after cooldown')"
+
+SSHL_TEST_ATTEMPTS="$test_tmp/attempts" SSHL_TEST_READY="$test_tmp/ready" \
+  "$nvim_bin" --clean --headless -u NONE \
+  "+lua local ok, err = pcall(function() $test_expr end); if not ok then vim.api.nvim_err_writeln(err); vim.cmd('cquit') end" \
+  "+qa"
