@@ -1,6 +1,14 @@
 return {
   "folke/snacks.nvim",
-  opts = { explorer = {} },
+  opts = {
+    explorer = {},
+    picker = {
+      win = {
+        input = { keys = { ["<a-h>"] = { "toggle_hidden", mode = "i" } } },
+        list = { keys = { ["<a-h>"] = false } },
+      },
+    },
+  },
   keys = {
     {
       "<A-e>",

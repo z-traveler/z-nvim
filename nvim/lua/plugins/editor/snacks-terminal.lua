@@ -6,18 +6,16 @@ return {
         return opts
       end
       local keys = opts.terminal.win.keys
-      local key_mapping = {
-        ["<C-h>"] = "<A-h>",
-        ["<C-j>"] = "<A-j>",
-        ["<C-k>"] = "<A-k>",
-        ["<C-l>"] = "<A-l>",
+      -- Alt-h/j/k/l 由 vim-tmux-navigator 全局接管，这里只移除 LazyVim 默认的 Ctrl 导航。
+      local ctrl_navigation_keys = {
+        ["<C-h>"] = true,
+        ["<C-j>"] = true,
+        ["<C-k>"] = true,
+        ["<C-l>"] = true,
       }
-      for _, key_config in pairs(keys) do
-        if type(key_config) == "table" and key_config[1] then
-          local old_key = key_config[1]
-          if key_mapping[old_key] then
-            key_config[1] = key_mapping[old_key]
-          end
+      for name, key_config in pairs(keys) do
+        if type(key_config) == "table" and ctrl_navigation_keys[key_config[1]] then
+          keys[name] = nil
         end
       end
     end,
