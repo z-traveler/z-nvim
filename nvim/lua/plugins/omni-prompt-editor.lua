@@ -2,7 +2,7 @@ return {
   {
     "z-traveler/omni-hooks",
     name = "omni-prompt-editor",
-    commit = "2b750e5c3b97cb69635102fb5e28c9cac7a9d287",
+    commit = "35258ecc82291d1995ff093e4566099dde71efae",
     lazy = false,
     config = function(plugin)
       vim.opt.runtimepath:prepend(plugin.dir .. "/modules/prompt-editor/nvim")
