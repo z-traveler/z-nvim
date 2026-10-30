@@ -36,18 +36,38 @@
 
 ## Codex / Claude Code Prompt Editor
 
-`omni-prompt-editor` 由 lazy.nvim 从 `z-traveler/omni-hooks` 安装。按 `Ctrl+G` 打开临时输入文件时，
-它会在上方显示上一条回答，下方保留当前输入。
+`omni-prompt-editor` 由 lazy.nvim 从 `z-traveler/omni-hooks` 安装；它和 markview 的提交都固定
+在版本管理中的插件规格内。本仓库的 `lazy-lock.json` 按既有规则仅保留在本机，不提交。
+按 `Ctrl+G` 打开临时输入文件时，上方显示只读回答，下方保留当前输入；右上角的小浮窗常驻
+显示附近轮次的提问与回答摘要，不抢输入焦点、不增加分窗。Pi 的 Ctrl+G 使用单独安装的
+omni-hooks Pi bundle，但共享这套 Neovim 配色与 markview 渲染配置。
+
+| 快捷键 | 作用范围 | 行为 |
+|--------|----------|------|
+| `<leader>sa` | Ctrl+G 输入 / 回答 buffer | 搜索本 session 的回答，原 `gH` 入口已移除 |
+| `[a` / `]a` | Ctrl+G 输入 / 回答 buffer | 上一轮 / 下一轮回答，到头停止；不修改当前输入 |
+| `Enter` | 历史搜索 picker | 在原回答窗口打开选中轮次，保持现有预览与接受方式 |
+| `<leader>um` | Markdown buffer | 切换 markview 渲染 |
+
+历史只模糊搜索回答正文，提问仅用于两行列表的辨认。正常代码 buffer 中的 `[a` / `]a` 仍为
+Treesitter 参数导航。列表需要 fzf-lua 与 fzf >= 0.53；Markdown 渲染使用 markview.nvim，
+不再启用 render-markdown.nvim。需要 `markdown`、`markdown_inline` Tree-sitter parser。
+本配置在配色方案之后加载 markview；prompt editor 会为只读回答关闭 hybrid 模式并在换轮时重绘。
 
 新机器拉取配置后执行：
 
 ```bash
-nvim --headless "+Lazy! sync" +qa
+nvim --headless "+Lazy! update omni-prompt-editor markview.nvim" +qa
 ~/.codex/switch-config.sh <profile>
 ~/.claude/switch-settings.sh <profile> --force
 ```
 
 后两条命令将各自的 static hook 配置重新生成到当前运行配置。运行时还需要 `bash`、`jq` 和 `ps`。
+验证本机渲染器、parser、开关与 prompt-editor 固定版本：
+
+```bash
+nvim --headless '+lua dofile("scripts/test-markdown.lua")'
+```
 
 ---
 

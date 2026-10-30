@@ -2,8 +2,10 @@ return {
   {
     "z-traveler/omni-hooks",
     name = "omni-prompt-editor",
-    commit = "45df988a1be348567a704414db0293be062717a1",
+    commit = "8ea76d29d55562c39be02d6044a0f54fc12d5988",
     lazy = false,
+    -- 先加载参数导航，避免 VeryLazy 在 Ctrl+G 之后覆盖 [a / ]a。
+    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
     config = function(plugin)
       vim.opt.runtimepath:prepend(plugin.dir .. "/modules/prompt-editor/nvim")
       -- 避免旧的 site module 覆盖 lazy.nvim 固定的版本

@@ -1,16 +1,14 @@
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    ft = { "markdown" },
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-mini/mini.icons",
-    },
-    opts = {
-      latex = { enabled = false },
-    },
+    enabled = false,
+  },
+  {
+    "OXY2DEV/markview.nvim",
+    commit = "ecc5a8867daa1856f8bcc5fdbceca8f5a5ce5f5d",
+    lazy = false,
     keys = {
-      { "<leader>um", "<cmd>RenderMarkdown toggle<cr>", ft = "markdown", desc = "Render Markdown" },
+      { "<leader>um", "<cmd>Markview toggle<cr>", ft = "markdown", desc = "Render Markdown" },
     },
   },
   {
