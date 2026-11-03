@@ -38,9 +38,22 @@
 
 `omni-prompt-editor` 由 lazy.nvim 从 `z-traveler/omni-hooks` 安装；它和 markview 的提交都固定
 在版本管理中的插件规格内。本仓库的 `lazy-lock.json` 按既有规则仅保留在本机，不提交。
-按 `Ctrl+G` 打开临时输入文件时，上方显示只读回答，下方保留当前输入；右上角的小浮窗常驻
-显示附近轮次的提问与回答摘要，不抢输入焦点、不增加分窗。Pi 的 Ctrl+G 使用单独安装的
-omni-hooks Pi bundle，但共享这套 Neovim 配色与 markview 渲染配置。
+按 `Ctrl+G` 打开临时输入文件时，上方显示只读回答，下方保留当前输入；默认在输入区左侧
+显示固定宽度的历史 pane，不抢输入焦点。两行条目为带独立颜色的序号、时间、可用提问和
+回答摘要，不再补「回答」或「未完成／过程」标签。导航标题只保留 `7/8`，不附快捷键提示。
+Pi 的 Ctrl+G 使用单独安装的 omni-hooks Pi bundle，但共享 Neovim 配色与 markview 渲染配置。
+
+导航布局读取用户 env.json 的 `omni_hooks["prompt-editor"].history`：
+`view` 为 `pane` / `float`，`target` 为 `input` / `answer`，`position` 在 pane 下为
+`top` / `bottom` / `left` / `right`，在 float 下为
+`top-left` / `top-right` / `bottom-left` / `bottom-right`。默认 `pane` / `input` / `left`。
+Pi 的文件为 `~/.pi/agent/omni-hooks/env.json`；例如输入区右上角浮窗：
+
+```json
+{"omni_hooks":{"prompt-editor":{"history":{"view":"float","target":"input","position":"top-right"}}}}
+```
+
+只合并此 namespace，保留已有 notify/diary 配置；重开 Ctrl+G 生效。
 
 | 快捷键 | 作用范围 | 行为 |
 |--------|----------|------|
@@ -52,7 +65,8 @@ omni-hooks Pi bundle，但共享这套 Neovim 配色与 markview 渲染配置。
 历史只模糊搜索回答正文，提问仅用于两行列表的辨认。正常代码 buffer 中的 `[a` / `]a` 仍为
 Treesitter 参数导航。列表需要 fzf-lua 与 fzf >= 0.53；Markdown 渲染使用 markview.nvim，
 不再启用 render-markdown.nvim。需要 `markdown`、`markdown_inline` Tree-sitter parser。
-本配置在配色方案之后加载 markview；prompt editor 会为只读回答关闭 hybrid 模式并在换轮时重绘。
+本配置在配色方案之后加载 markview；只读回答和搜索预览都会渲染 Markdown，关闭 hybrid 模式。
+预览保留完整正文，并复用模糊匹配位置高亮、定位首个命中，不额外扫描历史。
 
 新机器拉取配置后执行：
 
