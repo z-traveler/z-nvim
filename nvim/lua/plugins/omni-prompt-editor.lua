@@ -2,7 +2,7 @@ return {
   {
     "z-traveler/omni-hooks",
     name = "omni-prompt-editor",
-    commit = "7bf06938819983aaeea81b86b8292b6c6ee8b41d",
+    commit = "a33e99dadf28dec1c146aa2d8a3cdefae7f3009a",
     lazy = false,
     -- 先加载参数导航，避免 VeryLazy 在 Ctrl+G 之后覆盖 [a / ]a。
     dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
