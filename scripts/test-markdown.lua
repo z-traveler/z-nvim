@@ -87,6 +87,18 @@ local function check()
   assert(vim.api.nvim_get_current_win() == input_win, "history navigation stole draft focus")
   assert(vim.api.nvim_buf_get_lines(input_buf, 0, -1, false)[1] == "draft stays unchanged")
 
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.b[vim.api.nvim_win_get_buf(win)].omni_prompt_history and vim.api.nvim_win_get_config(win).relative == "" then
+      vim.api.nvim_set_current_win(win)
+      vim.cmd("normal j")
+      assert(vim.api.nvim_win_get_cursor(win)[1] % 2 == 1, "j stopped on the second line of the same answer")
+      assert(vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1] == "Latest answer", "j opened an answer before Enter")
+      vim.api.nvim_feedkeys(vim.keycode("<CR>"), "mx", false)
+      assert(vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1] == "First answer", "Enter did not open the selected turn")
+      assert(vim.api.nvim_get_current_win() == win, "Enter left the history pane")
+    end
+  end
+
   vim.cmd("new")
   vim.bo.filetype = "lua"
   assert(
