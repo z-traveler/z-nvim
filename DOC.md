@@ -48,10 +48,10 @@ Pi 的 Ctrl+G 使用单独安装的 omni-hooks Pi bundle，但共享 Neovim 配�
 `view` 为 `pane` / `float`，`target` 为 `input` / `answer`，`position` 在 pane 下为
 `top` / `bottom` / `left` / `right`，在 float 下为
 `top-left` / `top-right` / `bottom-left` / `bottom-right`。默认 `pane` / `input` / `left`。
-Pi 的文件为 `~/.pi/agent/omni-hooks/env.json`；例如输入区右上角浮窗：
+Pi 的文件为 `~/.pi/agent/omni-hooks/env.json`；本机使用输入区右侧 pane，对应配置：
 
 ```json
-{"omni_hooks":{"prompt-editor":{"history":{"view":"float","target":"input","position":"top-right"}}}}
+{"omni_hooks":{"prompt-editor":{"history":{"view":"pane","target":"input","position":"right"}}}}
 ```
 
 只合并此 namespace，保留已有 notify/diary 配置；重开 Ctrl+G 生效。
@@ -392,6 +392,21 @@ Inlay hints 在编辑时自动隐藏（InsertEnter 禁用，InsertLeave 恢复�
 ---
 
 ## Quickfix / Loclist
+
+仅 agent 产出的改动列表按文件聚合成树：文件名和改动数量只显示一次，下方保留每次修改的
+行号与操作，相同行重复修改也保留。文件名、数量、行号、Edit / Write / patch 与层级线分别
+采用主题色，选中项用背景强调。默认展开，文件组支持 `za` / `zo` / `zc` / `zM` / `zR`。
+父节点是虚拟行，不占用真实 quickfix 索引，Enter、`[q` / `]q` 和 bqf 预览继续定位实际改动。
+
+普通搜索、诊断 quickfix 与 location list 不树化；离开 agent 列表时恢复原来的折叠选项和映射。
+新改动会回到 producer 标记的原列表，不会追加进正在查看的普通列表。升级前未标记的列表
+不会按标题猜测迁移；新一轮 agent 改动会创建树状列表。
+
+本机配置与实际 nvim-bqf 的回归检查：
+
+```bash
+nvim --headless '+lua dofile("scripts/test-agent-quickfix.lua")'
+```
 
 | 快捷键 | 说明 |
 |--------|------|
