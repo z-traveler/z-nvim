@@ -40,8 +40,10 @@
 在版本管理中的插件规格内。本仓库的 `lazy-lock.json` 按既有规则仅保留在本机，不提交。
 按 `Ctrl+G` 打开临时输入文件时，上方显示只读回答，下方保留当前输入；默认在输入区左侧
 显示固定宽度的历史 pane，不抢输入焦点。回答区与输入区仅在首次打开时分配尺寸，之后
-浏览历史不再根据回答长短调整布局，手动调整的尺寸也会保留。两行条目为带独立颜色的序号、时间、可用提问和
-回答摘要，不再补「回答」或「未完成／过程」标签。导航标题只保留 `7/8`，不附快捷键提示。
+浏览历史不再根据回答长短调整布局，手动调整的尺寸也会保留。pane/float 的每条记录固定三行：
+序号/时间、用户提问、回答摘要各占一行，分别使用主题色，避免窄窗口中的时间挤掉提问。
+未保存 prompt 的旧记录明确显示 `[prompt unavailable]`，不猜测补写，也不加「回答／未完成／过程」标签。
+导航标题只保留 `7/8`，不附快捷键提示。
 Pi 的 Ctrl+G 使用单独安装的 omni-hooks Pi bundle，但共享 Neovim 配色与 markview 渲染配置。
 
 导航布局读取用户 env.json 的 `omni_hooks["prompt-editor"].history`：
@@ -60,15 +62,17 @@ Pi 的文件为 `~/.pi/agent/omni-hooks/env.json`；本机使用输入区右侧 
 |--------|----------|------|
 | `<leader>sa` | Ctrl+G 输入 / 回答 buffer | 搜索本 session 的回答，原 `gH` 入口已移除 |
 | `[a` / `]a` | Ctrl+G 输入 / 回答 buffer | 上一轮 / 下一轮回答，到头停止；不修改当前输入 |
-| `j` / `k` | 历史 pane | 每次选择一个两行条目，支持次数，到头停止，不自动打开 |
-| `Enter` | 历史 pane | 打开光标所在条目，两行均可；保留 pane 焦点以便继续浏览 |
+| `j` / `k` | 历史 pane | 每次选择一个三行条目，支持次数，到头停止，不自动打开 |
+| `Enter` | 历史 pane | 打开光标所在条目，三行均可；保留 pane 焦点以便继续浏览 |
 | `Enter` | 历史搜索 picker | 在原回答窗口打开选中轮次，保持现有预览与接受方式 |
 | `<leader>um` | Markdown buffer | 切换 markview 渲染 |
 
-历史只模糊搜索回答正文，提问仅用于两行列表的辨认。正常代码 buffer 中的 `[a` / `]a` 仍为
+历史只模糊搜索回答正文，提问只用于辨认；搜索 picker 仍保留两行标签。正常代码 buffer 中的 `[a` / `]a` 仍为
 Treesitter 参数导航。列表需要 fzf-lua 与 fzf >= 0.53；Markdown 渲染使用 markview.nvim，
 不再启用 render-markdown.nvim。需要 `markdown`、`markdown_inline` Tree-sitter parser。
 本配置在配色方案之后加载 markview；只读回答和搜索预览都会渲染 Markdown，关闭 hybrid 模式。
+`nvim/lua/plugins/lang/markdown.lua` 将 `markdown.list_items.shift_width` 设为 `1`，列表标记
+只添加一格额外缩进，保留轻微层次感；普通 Markdown、回答与搜索预览共用此配置。
 预览保留完整正文，并复用模糊匹配位置高亮、定位首个命中，不额外扫描历史。
 
 新机器拉取配置后执行：
