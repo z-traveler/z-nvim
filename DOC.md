@@ -394,9 +394,13 @@ Inlay hints 在编辑时自动隐藏（InsertEnter 禁用，InsertLeave 恢复�
 ## Quickfix / Loclist
 
 仅 agent 产出的改动列表按文件聚合成树：文件名和改动数量只显示一次，下方保留每次修改的
-行号与操作，相同行重复修改也保留。文件名、数量、行号、Edit / Write / patch 与层级线分别
-采用主题色，选中项用背景强调。默认展开，文件组支持 `za` / `zo` / `zc` / `zM` / `zR`。
+行号与当前代码行，不再显示 write / edit 操作名；相同行重复修改也保留。代码预览优先读取
+未保存的修改缓冲区，否则读取磁盘最新内容，并非历史 diff。空行或不可读取的源码有明确占位；
+长行按窗口宽度裁切，完整上下文仍可通过 bqf 预览。文件名、数量、行号、层级线分别采用主题色，
+代码保持正文色，选中项用背景强调。默认展开，文件组支持 `za` / `zo` / `zc` / `zM` / `zR`。
 父节点是虚拟行，不占用真实 quickfix 索引，Enter、`[q` / `]q` 和 bqf 预览继续定位实际改动。
+发送端按 agent/hook 的工作目录将真实目标解析为绝对路径；树节点仍尽可能显示相对编辑器
+工作目录的路径，项目外文件保留完整路径，不用展示路径推断跳转目标。
 
 普通搜索、诊断 quickfix 与 location list 不树化；离开 agent 列表时恢复原来的折叠选项和映射。
 新改动会回到 producer 标记的原列表，不会追加进正在查看的普通列表。升级前未标记的列表
@@ -410,6 +414,7 @@ nvim --headless '+lua dofile("scripts/test-agent-quickfix.lua")'
 
 | 快捷键 | 说明 |
 |--------|------|
+| `<leader>sQ` | 搜索 Quickfix 列表栈（原 `<leader>fQ` 已移除，其他 `<leader>f…` 不变） |
 | `<A-q>` | 切换 Quickfix 窗口 |
 | `<A-o>` | 切换 Location List 窗口 |
 | `]q` / `[q` | Quickfix 下一项/上一项 |
